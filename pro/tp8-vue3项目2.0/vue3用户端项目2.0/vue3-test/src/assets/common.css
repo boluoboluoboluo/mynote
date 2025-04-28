@@ -1,0 +1,61 @@
+/* bl */
+.bl-see{
+	border:1px solid red;
+}
+.bl-hand{
+	cursor:pointer;
+}
+.bl-dis-flex{
+	display:flex;
+}
+.bl-text-center{
+	text-align:center;
+}
+.bl-fs-20{
+	font-size:1rem;
+}
+.bl-fs-18{
+	font-size:0.9rem;
+}
+.bl-fs-16{
+	font-size:0.8rem;
+}
+.bl-fs-14{
+	font-size:0.7rem;
+}
+.bl-fs-12{
+	font-size:0.6rem;
+}
+.bl-fs-10{
+	font-size:0.5rem;
+}
+.bl-bgc-common{
+	background-color:#151515;
+}
+.bl-fc-common{
+	color:#a3a3a3;
+}
+
+.bl-mt-10{
+	margin-top:0.5rem;
+}
+.bl-ml-20{
+	margin-left:1rem;
+}
+.bl-ml-10{
+	margin-left:0.5rem;
+}
+.bl-pl-10{
+	padding-left:0.5rem;
+}
+
+.bl-pl-20{
+	padding-left:1rem;
+}
+.bl-pt-20{
+	padding-top:1rem;
+}
+.bl-pt-10{
+	padding-top:0.5rem;
+}
+

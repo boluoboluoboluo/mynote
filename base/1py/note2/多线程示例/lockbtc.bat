@@ -1,0 +1,2 @@
+@python lockbtc.py
+@pause

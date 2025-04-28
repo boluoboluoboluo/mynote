@@ -1,0 +1,29 @@
+------------------------------
+# web服务启动时加载：
+	--openDocument.js，core/config.js，vite.config.js
+# http请求到来时加载：
+	--core/config.js，core/config.js，core/gin-vue-admin.js，router/index.js，permission.js，main.js
+  	--main.js加载
+    	--中间件permission.js加载（若有登录信息则跳转登录成功）
+    	--渲染admin登录页面，
+    	--初始化：根据数据库类型创建数据库和基础用户表角色表等（需要本地已安装相应数据库并运行服务）
+	--登录：根据页面默认的用户名密码，成功登录后台
+# 修改使用：
+    	--去掉服务启动自动加载的2个页面（1个登录页，1个gin-vue-admin官网）
+		--官网页面？在src目录opendocument.js里，将相关代码注释
+		--启动登录页在？vite.config.js中设置server:false
+  	--去掉http请求时web页面日志打印gin-vue-admin相关信息：
+		--src/core/gin-vue-admin.js里修改
+	--开发环境和生产环境配置：（url，端口，及后台api）
+		--.env.development和.env.production这两个文件
+    	--用户登录状态生命周期修改：
+		--userStore ？？
+    	
+# 问题		
+	--一次http请求的执行过程，vue3的web服务怎么执行代码，代码到浏览器又怎么运行？？？
+	--开发环境和生产环境配置？？区别
+	--import 的内容会加载到内存吗
+	--引入的js文件，css文件等会加载到内存吗
+	--jwt鉴权？，casbin鉴权？
+
+------------------------------

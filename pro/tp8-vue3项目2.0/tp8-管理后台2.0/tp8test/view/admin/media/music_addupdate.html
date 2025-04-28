@@ -1,0 +1,103 @@
+{extend name='../huicommon/base' /}
+
+{block name="headblock"}
+<title>后台</title>
+{/block}
+
+{block name="content"}
+<body>
+<article class="page-container">
+	<form class="form form-horizontal" id="form-admin-add">
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>标题：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" value="{$data['title']|default=''}" placeholder="" id="title" name="title">
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red"></span>描述：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<textarea class="textarea" name="desc">{$data['desc']|default=''}</textarea>
+		</div>
+	</div>
+	
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red"></span>排序：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" value="{$data['ordering']|default='0'}" id="ordering" name="ordering">
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red"></span>音频文件：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			  <span class="btn-upload form-group">
+				<input class="input-text upload-url" type="text" name="uploadfile" placeholder="当前仅支持.mp3,.m4a格式" id="uploadfile" value="{$data['url']|default=''}" readonly
+				 style="width:500px;background-color: #dddddd;">
+				{if empty($data['id'])}
+				<a href="javascript:void();" class="btn btn-primary upload-btn"><i class="Hui-iconfont">&#xe642;</i> 上传音频</a>
+				<input type="file" multiple name="file" class="input-file">
+				</span>
+				{/if}
+		</div>
+	</div>
+	
+	<div class="row cl">
+		<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+			<input type="hidden" name="id" value="{$data['id']|default=''}">
+			<input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+		</div>
+	</div>
+	</form>
+</article>
+{/block}
+
+{block name="jsblock"}
+<script type="text/javascript">
+$(function(){
+	$('.skin-minimal input').iCheck({
+		checkboxClass: 'icheckbox-blue',
+		radioClass: 'iradio-blue',
+		increaseArea: '20%'
+	});
+	
+	$("#form-admin-add").validate({
+		rules:{
+			title:{
+				required:true,
+				minlength:1,
+				maxlength:50
+			},
+		},
+		
+		submitHandler:function(form){
+			$(form).ajaxSubmit({
+				type: 'post',
+				url: "/admin/media/music_doaddupdate" ,
+				success: function(data){
+					// console.log(data)
+					if(data.code == 1){
+						layer.msg(data.msg,{
+							icon:1,
+							time:1200,
+							end:function () {
+								// var index = layer.getFrameIndex(window.name);
+								// //刷新，正常代码：parent.$('.refresh').click();
+								// //但是a标签的点击事件比较特殊，使用下面方式
+								// parent.$('.refresh')[0].click();	
+								// //关闭窗口
+								// parent.layer.close(index);	
+							}
+						});
+					}else{
+						layer.msg(data.msg,{icon:2,time:1300});
+					}
+				},
+				error: function(XmlHttpRequest, textStatus, errorThrown){
+					layer.msg('系统出错',{icon:2,time:1200});
+				}
+			});
+		}
+	});
+});
+</script> 
+{/block}

@@ -1,0 +1,5 @@
+请先执行：
+根目录/z_sqlscripts的sql脚本
+
+后端地址：
+/admin/base/login

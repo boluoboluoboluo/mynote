@@ -1,0 +1,5 @@
+python报错：ModuleNotFoundError:No module named "Crypto"
+
+解决方法：
+ --需要卸载pycrypto，pip uninstall pycrypto，
+ --然后安装pycryptodome，pip install pycryptodome，即可

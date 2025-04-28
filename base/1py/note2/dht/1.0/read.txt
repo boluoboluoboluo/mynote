@@ -1,0 +1,76 @@
+
+步骤
+1.创建Node.py定义结构类
+	class Node
+		Node 有一个RouteTable
+		Node有NetWork功能
+	class RouteTable
+		RouteTable有160个KBucket
+	class KBucket
+		KBucket有一个节点列表(最大存储20个节点)
+	class NetWork
+		实现发送udp请求
+		接收响应
+
+2.创建main.py
+	初始化2个节点 node1， node2
+	node1运行
+	node2运行
+	执行node1 加入 node2 方法
+
+3.实现逻辑
+	1> node1 加入 node2 方法：
+		node1 发送udp请求 node2 收到请求 
+		node2 根据请求返回数据 
+		node1 收到node2返回数据并处理（实现节点存储到KBucket）
+		优化：节点处理时添加锁
+
+	2> 实现 find_node 逻辑，扩展填充 本地dht节点
+		node1 基于 node2 执行find_node方法
+		node2 返回自身最近的node
+
+	3> 通用逻辑
+		通用方法 ping, find_node,  使用场景及其实现
+		store, find_value
+		节点通信机制(ping)
+		最后更新时间
+
+		缓存策略，重启时填充路由表
+		路由表满了，新节点如何处理
+
+		如何根据节点查找资源
+		路由表节点无法查找到资源，如何处理
+		死节点，网络超时
+		上传资源
+		安全问题
+		
+		bt软件源码参考
+
+	4> 通用逻辑（new）
+		通过已知节点加入网络
+		find_node(self.id) 	#根据自身id更新路由表
+		定时任务：定期刷新路由表，
+		如果桶长时间未更新，则发起桶内随机节点查询填充节点
+		ping机制检测节点存活 （移除多次无响应的节点）
+
+		本地节点缓存（持久化）
+		程序退出路由表缓存（持久化）
+
+
+	5> 其他
+		json序列化dht路由表实现，及验证
+
+		计算机底层信号
+
+		gzip压缩原理
+		持久化文件损坏	添加校验和（如CRC32）
+
+		响应多，线程处理的情况
+
+		路由表访问权限，加密
+
+		
+
+		
+
+
