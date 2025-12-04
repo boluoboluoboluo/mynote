@@ -44,5 +44,7 @@ ssh admin@192.168.0.1	#示例
 
 #指定端口
 ssh -p port user@host
+#强制使用口令认证
+ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no user@host
 ```
 

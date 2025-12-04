@@ -1,0 +1,79 @@
+------------------------
+浏览器插件:
+	环境:chrome
+
+	基础结构:
+		配置:manifest.json
+		弹出页:popup.html
+		内容脚本:content.js
+		后台脚本:background.js
+
+	跨域说明:
+		同源策略,跨域限制
+		网页允许跨域的标签:script, link, img
+		js模拟点击方式下载网页视频
+		跨域url只能使用浏览器扩展		//注意: 控制台注入测试也不行
+
+	下载方式思考:
+		1. 代理服务器
+		2. 关闭cors
+		3. 网页动态注入js
+	
+	关于blob链接:
+		blob连接 (生命周期: 当前上下文会话)
+		blob链接绑定到它的创建源,如跨域的blob:
+			控制台注入无法fetch				//属于沙箱环境
+			浏览器扩展内容脚本也无法fetch		//属于隔离环境
+			后台脚本可以fetch
+
+	补充:
+		chrome.downloads.download受同源策略限制
+		后台脚本	无法使用	window.URL.createObjectURL(blob) 方式创建临时url
+		非同源url,a链接只能打开,无法下载
+
+	总结下载思路:
+		1.遍历页面video元素,给每个视频元素添加下载按钮
+		2.下载按钮点击:
+			开启后台脚本网络请求监听(后台脚本监听的视频地址,保存到chrome.storage.local)
+			同时触发视频重新下载video.load()
+			视频添加加载完成loadeddata事件监听器,
+			监听到视频加载完成:
+				关闭网络监听
+				同时获取监听的视频url
+				创建子按钮,给子按钮派发事件到注入的js文件(携带url)
+				js脚本根据fetch url,使用window.URL.createObjectURL(blob)生成临时url,创建临时a链接,下载
+		
+
+
+	不同分辨率显示,选择
+	视频音频合并
+	插件权限问题
+
+	下载名字,下载位置
+	监听dom,优化
+
+
+	代码阅读
+
+	注意:后台 background.js运行在独立的控制台,在扩展管理界面点击Servivce_Worker打开
+	
+
+	扩展下载和爬虫下载区别
+
+	blob格式视频下载测试:
+	https://www.douyin.com/video/7527139151134002432?modeFrom=
+
+	############## start 
+	问题:
+	from=noscript
+
+	后台脚本给内容脚本发1次消息,为什么内容脚本会打印2次?
+
+	浏览器扩展获取cookie
+
+	chrome.storage ?
+
+	关闭cors ?
+
+	############## end
+------------------------

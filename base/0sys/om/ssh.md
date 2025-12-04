@@ -42,6 +42,25 @@
 
 ```
 
+`.ssh/config` 内容示例:
+
+```sh
+#git配置(密钥验证)
+Host github.com
+	HostName github.com
+	PreferredAuthentications publickey
+	IdentityFile C:\Users\xxx\.ssh\id_rsa
+
+#虚拟机配置(口令验证)
+Host my-vm
+	HostName 192.168.137.130
+	User k
+	PreferredAuthentications password
+	PubkeyAuthentication no
+```
+
+
+
 #### dropbear
 
 ```sh

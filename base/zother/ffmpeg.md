@@ -29,6 +29,17 @@ file '2.mp4'
 file '3.mp4'
 ```
 
+##### 合并视频出现时长卡帧的问题解决
+
+```sh
+#问题描述: ffmpeg截取的视频再拼接时,可能会出现,时长不对,卡顿的问题
+#解决:
+#先将视频转换成ts格式,再拼接,就不会出问题
+ffmpeg -i 1.mp4 -c:v copy 1.ts
+ffmpeg -i 2.mp4 -c:v copy 2.ts
+#再拼接 1.ts 和 2.ts即可
+```
+
 
 
 #### 合并音频和视频
@@ -57,6 +68,15 @@ ffmpeg -i input.mp4 -ss 00:00:10 -t 10 -c copy output.mp4
 ffmpeg -i input.mp4 -ss 00:00:10 -to 00:00:20 -c copy output.mp4
 #剪辑视频第10秒到视频末尾
 ffmpeg -i input.mp4 -ss 00:00:10 -codec copy output.mp4
+
+========
+#剪辑的视频开头卡顿解决方案:
+#原因：直接从非关键帧（I帧）截取会导致播放器需要等待下一个关键帧才能解码。
+#解决方案：
+将 -ss（定位开始时间）参数放在 输入文件之前，FFmpeg会定位到最近的关键帧开始截取：
+ffmpeg -ss [开始时间] -i [输入文件] -t [持续时间] -c copy [输出文件]
+
+========
 ```
 
 #### 视频压缩
@@ -68,5 +88,60 @@ ffmpeg -i input.mp4 -ss 00:00:10 -codec copy output.mp4
   - **H.265（HEVC）编码**：相同画质下比特率可比H.264低30-50%。
 
 ```sh
+-b:v: 设置目标视频比特率 (如 1M, 1500k)。
+-b:a: 设置目标音频比特率 (如 128k, 192k, 256k)。
+
 ffmpeg -i input.mp4 -c:v libx264 -b:v 2M -c:a aac -b:a 128k output.mp4
+
+ffmpeg -i input.mov -c:v libx264 -c:a aac -b:a 192k output.mp4		//通用
+
+# gpu加速,NVIDIA NVENC (H.264)
+ffmpeg -i input.mp4 -c:v h264_nvenc -c:a copy output.mp4
+
+ffmpeg -i input.mkv -c:v libx265 -c:a aac -b:a 192k output.mp4		//高效,需设备播放
+
+# gpu加速,NVIDIA NVENC (H.265)
+ffmpeg -i input.mp4 -c:v hevc_nvenc -c:a copy output.mp4
 ```
+
+#### 视频字幕合并
+
+```
+ffmpeg -i input.mp4 -vf "subtitles=input.srt" output.mp4
+```
+
+#### 视频旋转
+
+```sh
+#命令
+ffmpeg -i in.mov -vf "transpose=1" out.mov
+
+#transpose为不同值时所代表的不同意义:
+	0: 逆时针和垂直翻转90度(默认)
+	1: 顺时针旋转90度
+	2: 逆时针方向90度
+	3: 顺时针和垂直翻转90度
+	
+#旋转180°
+ffmpeg -i input.mp4 -vf "transpose=2,transpose=2" out.mp4
+```
+
+#### 视频转码并保存字幕
+
+```sh
+ffmpeg -i input.mkv -c:v copy -c:a copy -c:s mov_text output.mp4	#携带的软字幕在某些播放器可能无法播放,如微信
+
+#将字幕烧录
+ffmpeg -i input.mkv -vf "subtitles=input.mkv:stream_index=0" -c:a copy output.mp4
+
+#外部字幕烧录
+ffmpeg -i input.mkv -vf "subtitles=subtitles.srt" -c:a copy output.mp4
+```
+
+#### 保留特定音轨
+
+```sh
+# 只保留第1条和第3条音轨
+ffmpeg -i input.mp4 -map 0:v -map 0:a:0 -map 0:a:2 -c copy output.mp4
+```
+

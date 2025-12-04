@@ -39,7 +39,7 @@ git push				#推送代码到远程仓库
 git log -3				#查看最近3次提交历史
 git log --stat -2		#查看最近的2次提交，显示文件名
 git log --pretty=oneline
-git log origin -3		#查看远程仓库3次提交历史
+git log origin/分支名 -3		#查看远程仓库3次提交历史
 git reflog 				#查看提交记录
 
 git show --raw			#查看最近的一次提交
