@@ -11,6 +11,13 @@
 
 #### 合并视频
 
+```sh
+# 合并多个视频（用 | 分隔）
+ffmpeg -i "concat:video1.ts|video2.ts|video3.ts" -c copy output.mp4		#注意是ts后缀
+```
+
+**方式二:**
+
 示例视频`1.mp4`,`2.mp4`,`3.mp4`
 
 ```sh
@@ -29,18 +36,23 @@ file '2.mp4'
 file '3.mp4'
 ```
 
+
+
 ##### 合并视频出现时长卡帧的问题解决
 
 ```sh
 #问题描述: ffmpeg截取的视频再拼接时,可能会出现,时长不对,卡顿的问题
 #解决:
 #先将视频转换成ts格式,再拼接,就不会出问题
-ffmpeg -i 1.mp4 -c:v copy 1.ts
-ffmpeg -i 2.mp4 -c:v copy 2.ts
+ffmpeg -i 1.mp4 -c copy 1.ts
+ffmpeg -i 2.mp4 -c copy 2.ts
 #再拼接 1.ts 和 2.ts即可
+
+============
+#说明:
+ffmpeg -i 1.mp4 -c:v copy 1.ts		#表示视频流复制,但音频会重新编码
+ffmpeg -i 1.mp4 -c copy 1.ts		#表示都不重新编码
 ```
-
-
 
 #### 合并音频和视频
 
@@ -78,6 +90,29 @@ ffmpeg -ss [开始时间] -i [输入文件] -t [持续时间] -c copy [输出文
 
 ========
 ```
+
+##### 关键帧剪辑
+
+```sh
+#如果当前想要截取的位置不是关键帧,会导致多截或少截的问题
+#此时应该插入关键帧,方法如下:
+#假如想要在视频第5秒位置截取,但第5秒不是关键帧,先插入关键帧:
+	#说明:截取前15秒的视频,重新编码,并在5秒的位置插入一个关键帧
+	ffmpeg -ss 00:00:00 -i input.mp4  -t 15 -c:v libx264 -force_key_frames 5 -c:a copy part1.mp4
+	#剩下部分视频直接截取:
+	ffmpeg -ss 00:00:15 -i input.mp4  -c copy part2.mp4
+	#然后将格式转为ts,方便合并:
+	ffmpeg -i part1.mp4 -c copy part1.ts
+	ffmpeg -i part2.mp4 -c copy part2.ts
+	#合并视频:
+	ffmpeg -i "concat:part1.ts|part2.ts" -c copy output.mp4
+	#最后对有关键帧的视频进行截取
+	ffmpeg -ss 00:00:05 -i output.mp4  -c copy output2.mp4		#现在可以在第5秒截取了
+```
+
+
+
+
 
 #### 视频压缩
 

@@ -1,0 +1,144 @@
+=========================
+系统和用户目录,系统空间,系统参数,->截图保存
+服务,进程等,网络连接,端口->截图
+初始设置 ?
+新机分区 ?
+备份 (创建恢复介质)
+小pe盘?
+
+常用工具安装 (相关软件文档整理 )
+	7zip
+	vscode
+	typora
+	pdf (sumatrapdf)
+	google
+	sublime
+	git (仓库checkout)
+	python
+	vmare ?
+	everything
+	freefilesync (硬盘数据同步)
+	veracrypt	
+	autoruns ? (rubbish clear)
+	? monitor software
+		
+	
+	wechat
+	steam
+	potplayer
+	westworldvpn
+	thunder
+	ffmpeg
+	googlejapanese
+	
+	火绒?
+
+	
+旧电脑数据迁移 (lan)
+数据整理(浏览器mark.potplayer.steam...)
+
+
+win电脑清理:
+1.专业卸载工具:Revo Uninstaller
+	查找软件,卸载,并清理残留
+2.手动清理
+	常见软件数据残留,如下目录:
+	C:\Program Files\
+	C:\Program Files (x86)\
+	C:\Users\[你的用户名]\AppData\Local\ (隐藏文件夹)
+	C:\Users\[你的用户名]\AppData\Roaming\ (隐藏文件夹)
+	
+	清理临时和缓存目录:
+	按 Win + R，输入 %temp% 并回车，删除此文件夹内所有内容。
+	按 Win + R，输入 temp 并回车，删除此文件夹内所有内容（管理员权限）
+3.清理注册表(注意备份)
+	工具:CCleaner:
+		CCleaner->注册表->扫描, 扫描完后,点修复
+
+	手动方式:
+	按 Win + R，输入 regedit 打开注册表编辑器
+	在以下路径中，查找已卸载软件的名称或开发商名称，并删除对应的键：
+		HKEY_CURRENT_USER\Software\
+		HKEY_LOCAL_MACHINE\SOFTWARE\
+		HKEY_CLASSES_ROOT (这里主要是文件关联，除非你确认，否则不建议动)
+		HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run (清理开机启动项)
+		HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run (清理开机启动项)
+4.清理系统服务残留
+	工具:Autoruns (微软官方工具)
+	管理员运行, 程序启动后会加载所有自动启动项、服务、驱动等。
+	File->Find... , 查找已卸载软件残留,删除
+5.磁盘清理
+	win自带"磁盘清理"工具,进行清理
+
+关于用户目录:
+	c:\users\USERNAME\AppData
+	|--Local		#本地计算机的软件数据，缓存和临时文件的大本营。
+	|--Roaming	#存放你的个人软件配置。
+	|--LocalLow	#存放低完整性级别的应用程序数据（如浏览器隐私模式）。一般数据量不大，清理意义较小。
+
+	查看目录空间工具:
+	WizTree		#官网: https://www.diskanalyzer.com/
+
+
+
+
+win11优化:
+0.禁用win更新 (略)
+1.设置->隐私->搜索相关, 关闭
+2.设置->个性化->锁屏相关, 关闭
+3.任务栏->小组件, 关闭
+4.服务services.msc, 查找edge服务相关,禁用
+5.任务计划->任务计划程序库->edge相关,禁用
+6.设置,应用->启动, 关闭不需要的启动
+
+
+===========================
+其他:
+#关闭休眠模式
+powercfg -h off #关闭休眠模式	(休眠模式会占据和内存等量的硬盘空间) on:开启
+
+拆机释放静电: 取出电池,长按电源键10~15秒,释放主板静电
+
+win11 21h2最正常的版本?
+
+天选air2025网卡问题换网卡:ax210无线网卡
+
+=====================
+鼠标:
+惠普:104*61*34
+雷柏:111.4*64*40
+
+
+适配器换购指南:
+	1.电压（V，伏特） - 必须完全相同！
+	2.电流（A，安培）或功率（W，瓦特） - 可以等于或大于原装值！	#功率计算： 功率（W）= 电压（V）× 电流（A）。例如 19V × 3.42A ≈ 65W。
+	3.接口极性（内正外负 / 内负外正）- 必须完全一致！				#接口形状也要一致
+
+
+分辨率:屏幕像素数量	#在相同分辨率下，屏幕尺寸越小，像素密度（PPI）越高，画面就越细腻、越看不到像素点（“颗粒感”）。反之亦然。
+刷新率:屏幕刷新速度
+帧率:电脑生成画面的速度	#由cpu/gpu决定,受刷新率限制
+
+
+=====================
+键盘轴:
+
+黑轴：
+按压力度较大，触发速度快，适合专业游戏
+触发行程：2.0左右，触发压力：60左右，段落感：无
+
+青轴：
+段落感强，声音清脆，适合打字
+触发形行程：2.2左右，触发压力：50左右，段落感：明显
+
+茶轴：
+声音小，轻微段落感，适合大部分用户
+触发行程：2.0左右，触发压力：45左右 段落感：微弱
+
+红轴：
+降噪，声音安静，办公游戏都可以
+触发行程：2.0左右，触发压力：45左右，段落感：无
+
+
+
+

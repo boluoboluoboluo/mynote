@@ -1,4 +1,4 @@
-### 查看内存
+### psutil查看内存
 
 * 使用跨平台模块`psutil`查看内存资源，需先安装模块：
 
@@ -61,5 +61,16 @@ if __name__ == '__main__':
 	
 	# 查看当前进程内存消耗
 	print('当前进程内存消耗：%.2f MB' % (psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024))
+```
+
+### tracemalloc内置模块
+
+```py
+import tracemalloc
+tracemalloc.start()
+# 你的代码...
+current, peak = tracemalloc.get_traced_memory()		#查看上面代码段内存占用
+print(f"当前内存: {current / 1024 / 1024:.2f} MB，峰值: {peak / 1024 / 1024:.2f} MB")
+tracemalloc.stop()
 ```
 

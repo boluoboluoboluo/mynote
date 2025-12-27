@@ -295,6 +295,9 @@ netsh wlan delete profile name="你的热点名称"
 ```sh
 #防火墙重启
 netsh advfirewall reset
+
+#查看文件夹大小 实用技巧
+dir /s | find "个文件"
 ```
 
 
