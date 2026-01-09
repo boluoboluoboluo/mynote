@@ -1,0 +1,136 @@
+﻿
+{% extends 'huicommon/base.html' %}
+
+{% block headblock %}
+<title>后台</title>
+{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 系统管理 <span class="c-gray en">&gt;</span> 角色列表 
+	<a class="btn btn-success radius r refresh" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+	
+	<div class="cl pd-5 bg-1 bk-gray mt-20">
+		<span class="l">
+			<a href="javascript:;" onclick="tab_add('添加','/admin/sys/role_addupdate','800','500')" class="btn btn-primary radius"><i class="Hui-iconfont">&#xe600;</i> 添加角色</a>
+		</span>
+	</div>
+	<table id="data-table-list" class="table table-border table-bordered table-bg table-hover table-sort table-responsive">
+		<thead>
+			<tr class="text-c">
+				<th width="40">ID</th>
+				<th width="150">角色名称</th>
+				<th width="90">角色描述</th>
+				<th width="130">创建时间</th>
+				<th width="130">修改时间</th>
+				<th width="100">操作</th>
+			</tr>
+		</thead>
+		<tbody>
+		</tbody>
+	</table>
+</div>
+{% endblock %}
+
+{% block jsblock %}
+<!--请在下方写此页面业务相关的脚本-->
+<!-- <script type="text/javascript" src="{{ url_for('static',filename='admin/lib/My97DatePicker/4.8/WdatePicker.js') }}"></script> -->
+<script type="text/javascript" src="{{ url_for('static',filename='admin/lib/datatables/1.10.15/jquery.dataTables.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static',filename='admin/lib/laypage/1.2/laypage.js') }}"></script>
+
+<script type="text/javascript">
+
+// 运行获取数据列表这个方法，这里面可以灵活自定义要传递的参数
+function getDataTable(){
+	$('.table-sort').dataTable({
+		"destroy":true, //查询订单时销毁当前数据
+		"searching": false,
+		"ordering": false,
+		"aaSorting": [[ 1, "desc" ]],//默认第几个排序
+		"bStateSave": true,//状态保存
+		"pading":false,
+		"pagingType": "simple_numbers",
+		"serverSide": true, // 是否开启服务器模式
+		"ajax": {
+			"url": "/admin/sys/role_list_data", //请求数据的后台地址
+			"type": "POST",	// ajax的请求方法
+			"data": {},
+		},
+		"createdRow":function(row,data,dataIndex){
+			$(row).addClass("text-c");	//居中
+		},
+		//需要接收返回的数据
+		//总的数量与表格的列数必须一致，不能多也不能少，一个变量代表一个td
+		"columns": [
+		{"data": "id"},
+		{"data": "role_name"},
+		{"data": "role_desc"},
+		{"data": "createtime"},
+		{"data": "updatetime"},
+		{
+			"data": "id",
+			"className":"f-14 td-manage",
+			"render": function (data,type,row) {
+				if(data){
+					let _edit = '<a title="编辑" href="javascript:;" onclick="tab_edit(\'编辑\',\'/admin/sys/role_addupdate?id=' + data + '\',\'1\',\'800\',\'500\')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6df;</i></a>';
+					let _del = '<a title="删除" href="javascript:;" onclick="tab_del(this,'+ data +')" class="ml-5" style="text-decoration:none"><i class="Hui-iconfont">&#xe6e2;</i></a>';
+
+					return _edit + _del;
+				}
+			}
+		},
+		],
+	});
+}
+$(function(){
+	//自定义查询条件
+	getDataTable();
+	// 搜索
+	$(".search").on("click",function(){
+		getDataTable();	
+	});
+});
+
+/*
+	参数解释：
+	title	标题
+	url		请求的url
+	id		需要操作的数据id
+	w		弹出层宽度（缺省调默认值）
+	h		弹出层高度（缺省调默认值）
+*/
+
+/*增加*/
+function tab_add(title,url,w,h){
+	layer_show(title,url,w,h);
+}
+/*删除*/
+function tab_del(obj,id){
+	layer.confirm('确认要删除吗？<font color=red>(该操作不可恢复，请慎重！)</font>',function(index){
+		$.ajax({
+			type: 'POST',
+			url: '/admin/sys/role_del',
+			data:{id:id},
+			dataType: 'json',
+			success: function(res){
+				if(res.code == 1){
+					$(obj).parents("tr").remove();
+					layer.msg(res.msg,{icon:1,time:1000});
+				}else{
+					layer.msg(res.msg,{icon:2,time:1000});
+				}
+			},
+			error:function(res) {
+				layer.msg('系统错误!',{icon:2,time:1000});
+			},
+		});		
+	});
+}
+
+/*编辑*/
+function tab_edit(title,url,id,w,h){
+	layer_show(title,url,w,h);
+}
+
+</script>
+{% endblock %}

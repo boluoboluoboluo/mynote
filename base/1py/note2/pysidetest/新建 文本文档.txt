@@ -1,0 +1,6 @@
+python编写gui的框架
+
+1.安装python虚拟环境
+2.虚拟环境安装pyside6
+	#可安装指定版本
+	pip install pyside6==6.4.1

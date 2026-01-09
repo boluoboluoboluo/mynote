@@ -1,0 +1,20 @@
+1.创建工作区
+ --新建目录wkspace，cmd到此目录执行 go work init
+ --wkspace下新建项目目录jintest，cmd到此目录下执行go mod init jintest
+ --jintest下新建src目录，cmd到此目录下执行go mod init jintest/src
+ --src下新建文件helloworld.go	//参加示例文件
+
+2.安装gin
+ --cmd下设置代理：go env -w GOPROXY=https://goproxy.cn,direct			//不设置无法从github.com下载
+  --安装gin：go install github.com/gin-gonic/gin@latest
+  --说明：
+    --可通过go env查看mod目录，默认安装在c:/用户/go/pck				
+  --清理全部包命令：go clean --modcache
+
+3.在1步创建的工作区wkspace的文件go.work,添加目录如下：
+  --use(
+   ./gintest
+   C:/用户/go/pck/gin目录
+ )
+
+4.运行helloworld.go文件测试

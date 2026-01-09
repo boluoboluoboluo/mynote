@@ -1,0 +1,15 @@
+{% extends 'huicommon/base.html' %}
+
+{% block headblock %}
+<link href="{{ url_for('static',filename='bl/css/hello.css') }}" rel="stylesheet" type="text/css" />
+<title>this is a title</title>
+{% endblock %}
+
+{% block content %}
+  <p class="hello">hello world</p>
+{% endblock %}
+
+{% block jsblock %}
+<script type="text/javascript"">
+</script> 
+{% endblock %}

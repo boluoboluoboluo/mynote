@@ -1,0 +1,10 @@
+go 1.19
+
+use (
+	./gintest
+	C:\Users\52369\go\pkg\mod\github.com\gin-gonic\gin@v1.9.0
+	C:\Users\52369\go\pkg\mod\github.com\gorilla\sessions@v1.2.1
+	C:\Users\52369\go\pkg\mod\github.com\go-playground\validator\v10@v10.11.2
+	C:\Users\52369\go\pkg\mod\github.com\gin-contrib\sessions@v0.0.5
+	C:\Users\52369\go\pkg\mod\github.com\dchest\captcha@v1.0.0
+)

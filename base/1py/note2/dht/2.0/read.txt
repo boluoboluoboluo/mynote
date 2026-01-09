@@ -1,0 +1,99 @@
+步骤
+1.创建Node.py定义结构类
+	class Node
+		Node 有一个RouteTable
+		Node有NetWork功能
+	class RouteTable
+		RouteTable有160个KBucket
+	class KBucket
+		KBucket有一个节点列表(最大存储20个节点)
+	class NetWork
+		实现发送udp请求
+		接收响应
+
+2.创建main.py
+	初始化2个节点 node1， node2
+	node1运行
+	node2运行
+	执行node1 加入 node2 方法
+
+3.实现逻辑
+	1> node1 加入 node2 方法：
+		node1 发送udp请求 node2 收到请求 
+		node2 根据请求返回数据 
+		node1 收到node2返回数据并处理（实现节点存储到KBucket）
+		优化：节点处理时添加锁
+
+	2> 实现 find_node 逻辑，扩展填充 本地dht节点
+		node1 基于 node2 执行find_node方法
+		node2 返回自身最近的node
+
+	3> 通用逻辑
+		通用方法 ping, find_node,get_peers,anounce_peer 等 使用场景及其实现
+		节点通信机制(ping)
+		最后更新时间
+
+		缓存策略，重启时填充路由表
+		路由表满了，新节点如何处理
+
+		如何根据节点查找资源
+		路由表节点无法查找到资源，如何处理
+		死节点，网络超时
+		上传资源
+		安全问题
+		
+		bt软件源码参考
+		bt文档
+		《Kademlia: A Peer-to-peer Information System Based on the XOR Metric》
+		 BitTorrent DHT协议RFC文档
+
+4. 实现（new）
+	通过已知节点加入网络
+	find_node(self.id) 	#根据自身id更新路由表
+	定时任务：定期刷新路由表，
+	如果桶长时间未更新，则发起桶内随机节点查询填充节点
+	ping机制检测节点存活 （移除多次无响应的节点）
+
+	本地节点缓存（持久化）
+	程序退出路由表缓存（持久化）
+
+	4.1> 维持节点通信
+			返回错误码处理
+			re message:OrderedDict([('e', [201, 'too many requests']), ('t', '46'), ('y', 'r')])
+	4.2> 查找资源
+			find_value,store，get_peers,anounce_peer
+			根据名字搜索
+			根据infohash搜索
+			get_peers返回token的校验
+			peers持久化
+
+	4.3> 下载资源
+
+	4.4> 提供资源
+
+5. 其他
+
+	
+	info_hash = b'\xab\xebK\xe4\xa4\x1d\x9a\xd4\x8f\xf1=`\xd46\x87&\x0f\xbd\x87\x99'
+	get_peers response:
+		INFO]get peers avaliable addr:('168.119.13.211', 53177)
+		msg:OrderedDict([('r', OrderedDict([('id', b'\xab\xe0\x87\xc7k\x90\xdei\xc8\xa69w\x11\x0f\x1e\x84\xaa\x83\x81\xa0'), 
+		('token', b'\xab\xe0\x87\xc7k\x90\xdei\xc8\xa69w\x11\x0f\x1e\x84\xaa\x83\x81\xa0'), 
+		('values', [b'\x1f\xc8\xf9\xa2|\xa6'])])), ('t', '2199'), ('y', 'r')])
+
+	恶意节点攻击
+	丢包
+	
+	路由表访问权限，加密
+	道德规范？
+
+	ipv4/ipv6
+	带宽限制
+
+
+
+
+
+
+
+

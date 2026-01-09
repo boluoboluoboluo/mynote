@@ -1,0 +1,2 @@
+@python txttosql.py
+@pause

@@ -1,0 +1,2 @@
+@python s.py
+@pause

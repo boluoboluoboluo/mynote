@@ -1,0 +1,152 @@
+
+{% extends 'huicommon/base.html' %}
+
+{% block headblock %}
+<title>后台</title>
+{% endblock %}
+
+{% block content %}
+<body>
+<article class="page-container">
+	<form class="form form-horizontal" id="form-admin-add">
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>管理员名称：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" value="{{ admin_data["admin_name"] }}" placeholder="" id="admin_name" name="admin_name" 
+			{% if admin_data["id"] %}readonly=false style="background-color: rgb(173, 170, 170);"{% endif %}>
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red"></span>昵称：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" value="{{ admin_data["nick_name"] }}" placeholder="" id="nick_name" name="nick_name">
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>初始密码：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="password" class="input-text" autocomplete="off" value="" placeholder="密码" id="password" name="password">
+		</div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>确认密码：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="password" class="input-text" autocomplete="off"  placeholder="确认新密码" id="password2" name="password2">
+		</div>
+	</div>
+	
+	<!-- <div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>手机：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" value="" placeholder="" id="phone" name="phone">
+		</div>
+	</div> -->
+	
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red">*</span>角色：</label>
+		<div class="formControls col-xs-8 col-sm-9"> <span class="select-box" style="width:150px;">
+			<select class="select" name="admin_role" size="1">
+				<option value="">请选择</option>
+				{% for r in role_data %}
+				<option value="{{ r['id'] }}" {% if admin_data["role_id"] == r["id"] %}selected{% endif %}>{{ r['role_name'] }}</option>
+				{% endfor %}
+			</select>
+			</span> </div>
+	</div>
+	<div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3"><span class="c-red"></span>邮箱：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<input type="text" class="input-text" placeholder="@" name="email" id="email" value="{{ admin_data["email"] }}">
+		</div>
+	</div>
+	<!-- <div class="row cl">
+		<label class="form-label col-xs-4 col-sm-3">备注：</label>
+		<div class="formControls col-xs-8 col-sm-9">
+			<textarea name="" cols="" rows="" class="textarea"  placeholder="说点什么...100个字符以内" dragonfly="true" onKeyUp="$.Huitextarealength(this,100)"></textarea>
+			<p class="textarea-numberbar"><em class="textarea-length">0</em>/100</p>
+		</div>
+	</div> -->
+	<div class="row cl">
+		<div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-3">
+			<input type="hidden" name="id" value="{{ admin_data["id"] }}">
+			<input class="btn btn-primary radius" type="submit" value="&nbsp;&nbsp;提交&nbsp;&nbsp;">
+		</div>
+	</div>
+	</form>
+</article>
+{% endblock %}
+
+{% block jsblock %}
+<script type="text/javascript">
+$(function(){
+	$('.skin-minimal input').iCheck({
+		checkboxClass: 'icheckbox-blue',
+		radioClass: 'iradio-blue',
+		increaseArea: '20%'
+	});
+	
+	$("#form-admin-add").validate({
+		rules:{
+			admin_name:{
+				required:true,
+				minlength:1,
+				maxlength:20
+			},
+			password:{
+				required:true,
+			},
+			password2:{
+				required:true,
+				equalTo: "#password"
+			},
+
+			//非必须=====start
+			// phone:{
+			// 	required:true,
+			// 	isPhone:true,
+			// },
+			// email:{
+			// 	required:true,
+			// 	email:true,
+			// },
+			//非必须=====end
+
+			admin_role:{
+				required:true,
+			},
+		},
+		// onkeyup:false,
+		// focusCleanup:true,
+		// success:"valid",
+		submitHandler:function(form){
+			$(form).ajaxSubmit({
+				type: 'post',
+				url: "/admin/sys/admin_doaddupdate" ,
+				success: function(data){
+					// console.log(data)
+					if(data.code == 1){
+						layer.msg(data.msg,{
+							icon:1,
+							time:1200,
+							end:function () {
+								var index = parent.layer.getFrameIndex(window.name);
+								//刷新，正常代码：parent.$('.refresh').click();
+								//但是a标签的点击事件比较特殊，使用下面方式
+								parent.$('.refresh')[0].click();	
+								//关闭窗口
+								parent.layer.close(index);	
+							}
+						});
+					}else{
+						layer.msg(data.msg,{icon:2,time:1200});
+					}
+				},
+				error: function(XmlHttpRequest, textStatus, errorThrown){
+					layer.msg('系统出错',{icon:2,time:1200});
+				}
+			});
+		}
+	});
+});
+</script> 
+{% endblock %}

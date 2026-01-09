@@ -1,0 +1,2 @@
+@python compressPic.py
+@pause
