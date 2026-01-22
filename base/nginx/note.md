@@ -13,6 +13,8 @@ sudo systemctl status nginx 	#查看运行状态
 
 # 配置文件：
 /etc/nginx/nginx.conf
+
+sudo nginx -t	#检查配置文件语法
 ```
 
 

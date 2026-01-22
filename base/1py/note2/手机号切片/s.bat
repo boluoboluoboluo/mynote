@@ -1,2 +1,0 @@
-@python s.py
-@pause

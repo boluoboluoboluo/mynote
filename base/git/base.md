@@ -1,4 +1,23 @@
+### 单分支模式
 
+```sh
+#如果只需要某一个分支,不关注其他
+
+#方式一
+git clone --single-branch --branch master <仓库地址>	#单分支克隆:克隆master分支
+
+#方式二(配置只获取某个分支)
+git config remote.origin.fetch "+refs/heads/master:refs/remotes/origin/master"	#只获取master分支
+git remote prune origin		#清理不再追踪的分支的空间
+
+#================
+git fetch 	#下载所有分支
+git pull	#下载所有,合并当前
+git merge	#只合并当前s
+git push	#只推送当前
+
+git fetch --prune	#清理远程已经删除的分支的空间
+```
 
 ### 初始化
 
@@ -12,17 +31,22 @@ git init		#初始化git仓库
 ```sh
 git remote add origin git@xx.com:test/test.git		#添加远程仓库
 
-git fetch	#获取远程最新
+git fetch	#获取远程最新	默认获取 origin所有分支
 git merge	#合并到本地
 
-#相当于git fetch 和 git merge
+#相当于git fetch origin master 和 git merge
 git pull origin master	#拉取main分支
+
+git fetch origin 	#获取远程所有分支
+git fetch origin dev	#获取远程的dev分支
 ```
 
 ### 克隆
 
 ```sh
 git clone url			#克隆一个远程仓库
+git clone ssh://git@github.com:username/myrepo.git	#示例 github
+git clone ssh://username@gitxxx.com:10000/home/username/repo	#示例 服务器 (如果设置了端口)
 ```
 
 ### 提交
@@ -30,7 +54,10 @@ git clone url			#克隆一个远程仓库
 ```sh
 git add .				#添加文件到暂存区
 git commit -am "注释"		#提交代码到本地仓库	（需要双引号）
-git push				#推送代码到远程仓库
+git push				#推送代码到远程仓库	只推送当前分支内容
+
+==========
+git add -f xx.file		#强制添加某个文件,即使被.ignore忽略
 ```
 
 ### 日志
@@ -102,6 +129,7 @@ git reset head~		#撤销上一次的commit和add
 
 ```sh
 git branch 			#查看本地所有分支
+git branch -a		#查看所有分支
 git branch -r		#查看远程所有分支
 git branch <branchname>		#新建分支
 git branch -d <branchname>	#删除本地分支
@@ -110,10 +138,11 @@ git branch -M main		#分支重命名为 main
 
 git checkout <branchname>	#切换分支
 
+git checkout -b dev origin/dev	#创建分支dev,并关联远程的dev分支	
+git checkout dev 		#基本同上句,现代git会智能关联
+
 #以下命令将本地的 master 分支推送到 origin 主机的 master 分支。
 git push origin master
-
-
 
 git log branchname		#查看分支日志
 ```

@@ -28,7 +28,7 @@ apt和dpkg都是Ubuntu上的包管理工具。apt是在dpkg外面套了一层壳
 apt内部为每个包维护一个标记。如果是被作为依赖自动装进来的，它会被标记为“自动安装”。当没有其他手动安装的软件指向它时，它就变成了“孤儿包”。会被提示使用 apt autoremove 清理
 ```
 
-#### apt
+#### apt源
 
 针对debian系列系统
 
@@ -57,14 +57,16 @@ deb https://mirrors.ustc.edu.cn/debian-security/ bullseye-security main contrib 
 
 ```
 
+#### apt命令
+
 ```sh
 
 #apt-get适合脚本，apt适合终端交互
 sudo apt update		#更新源
 apt-cache madison package_name	#查询源可用版本
-
 sudo apt search <keyword>	#查找
 apt show <package_name>		#查看软件包的信息
+
 sudo apt install <package_name>	
 sudo apt install /full/path/file.deb		# 安装本地包
 sudo apt remove <package_name>	
@@ -82,6 +84,8 @@ sudo apt -t stable install <package_name>
 apt-cache depends package_name	#查看软件包的依赖关系
 apt-cache rdepends package_name	#查看软件包的被依赖情况
 
+#清理软件缓存
+apt clean
 ```
 
 ```sh
@@ -90,9 +94,7 @@ apt-cache rdepends package_name	#查看软件包的被依赖情况
 sudo apt install libcurl4=7.64.0-4+deb10u3		#指定安装版本(降级)
 ```
 
-
-
-#### dpkg
+#### dpkg命令
 
 ```sh
 wget https://xxx/xxx.deb	#下载deb文件
@@ -107,9 +109,30 @@ dpkg -l					#列出已安装的软件包
 dpkg -L package			#查询软件包的文件信息
 dpkg -l package.deb		#查询软件包的依赖关系
 
+#查看安装位置
+which php		#示例
+whereis php		#示例
 
 #清理配置文件残留
 dpkg -l |grep "^rc"|awk '{print $2}' |xargs aptitude -y purge
+```
+
+#### 安装文件
+
+```sh
+#位置
+可执行二进制文件	# /usr/bin/ 或 /bin/
+库文件 			# /usr/lib/ 或 /lib/
+静态资源/数据		  # /usr/share/<包名>/
+可选大型软件		  # /usr/local/  (旧:/opt/)
+系统级配置			# /etc/<包名>/
+用户级配置			#家目录,隐藏, ~/.config/<包名>/ (或以点开头的文件夹,如 ~/.ssh/)
+
+#可变化的文件位置
+缓存下载的 .deb		#/var/cache/apt/archives/
+包管理记录			#/var/lib/dpkg/
+日志文件			 #/var/log/<包名>/
+
 ```
 
 

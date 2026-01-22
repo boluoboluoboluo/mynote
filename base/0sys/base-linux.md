@@ -1,6 +1,4 @@
-### 概要
-
-
+### 系统
 
 #### 根文件系统
 
@@ -55,7 +53,516 @@ tty		#显示当前使用的tty设备
 echo "hello" >> /dev/pts/1		#向其他终端发信息，不（要轻易尝试向其他设备发数据！）
 ```
 
-#### 逻辑卷LVM
+#### 系统信息（debian为准）
+
+```sh
+systemd-analyze blame	#查看启动耗时
+
+shutdown -r now	#重启	如提示未找到命令，则前面加 sudo
+shutdown -r 10	#10分钟后重启
+shutdown -h now	#关机
+shutdown -h 10	#10分钟后关机
+-c	#取消
+
+sudo reboot		#重启
+sudo poweroff	#关机
+---------------------
+hostname 				#主机名 /etc/sysconfig/network
+echo $HOSTNAME			#获取当前主机名
+uname -a				#查看内核及发行版	或 cat /etc/os-release
+cat /proc/version		#查看版本的命令
+cat /proc/cpuinfo		#查看cpu信息
+cat /proc/meminfo		#查看内存信息
+lscpu #cpu详细信息
+lsusb	#查看usb设备
+lspci	#查看所有设备信息
+
+sudo dmidecode -t bios	#查看bios
+--------------------
+free	#查看内存 -h 友好显示
+
+top	#查看运行动态视图	
+	# 按 e 内存可mb,gb,tb等友好显示
+	# 按 shift+M 可以按内存大小排序
+
+vmstat	#显示系统状态信息
+vmstat 1 #每隔1秒显示1次
+vmstat 1 5 #每隔1秒显示1次，共显示5次
+
+iostat	#io压力
+------------------------------
+man 命令	#查看命令帮助
+#快捷打开终端： `ctrl+alt+t`
+#清屏幕：`ctrl+l` 或 命令clear
+#锁屏快捷键
+ctrl+alt+L
+#锁终端
+ctrl + S	#解锁:ctrl + Q
+#终止进程
+ctrl+c
+#挂起进程
+ctrl+z		#挂起当前进程到后台(占据内存-注意),使用jobs查看 
+
+date	#系统时间
+```
+
+#### 环境变量
+
+```sh
+set 	#设置变量,当前进程有效
+	--默认显示 所有环境变量+当前脚本/终端生效的私有变量	
+	--范围:(全部)
+export	#把普通变量导出为环境变量,使其被子进程(如在该终端启动的程序)继承
+	--默认显示 环境变量+终端生效的变量
+    --范围:(当前进程)
+		 
+env 	#临时设置环境变量  
+	--默认显示 当前所有环境变量		#等于 export -p
+	--范围:(跨进程)
+	
+unset varname	#删除当前生效的变量(环境变量+本地变量)
+=====================
+#相关文件
+/etc/profile	#环境变量	   用户级别:~/.bash_profile
+/etc/bashrc		#shell变量	用户级别:~/.bashrc
+=====================
+#添加环境变量,临时
+sudo export PATH=/home/mppath:$PATH		#终端或进程退出失效
+----------
+#添加环境变量,永久
+sudo vi /etc/profile	
+	在文档最后，添加:
+	export PATH="/home/tuotu/bin:$PATH"
+source   /etc/profile	#使立即生效
+----------
+=====================
+echo $PATH		#查看path环境变量
+echo $LANG		#查看编码
+echo $SHELL		#查看shell版本
+```
+
+### 服务
+
+```sh
+systemctl start 服务名			#启动服务
+systemctl stop 服务名			#停止
+systemctl restart 服务名		#重启
+systemctl reload 服务名		#重载
+systemctl enable 服务名		#自动启动
+systemctl disable 服务名		#不自动启动
+systemctl status 服务名		#服务状态
+
+systemctl list-units 服务名		#列出所有
+systemctl list-units --type=service	#查看所有服务
+systemctl list-units --type=service --state=running	#查看正在运行的服务
+systemctl list-unit-files --type=service --state=enabled	#查看开机自启的服务
+```
+
+### 进程
+
+```sh
+pstree	#进程树
+
+ps -aux		#查看当前登录用户所有进程
+-a 终端有关的进程
+-u 启动进程的用户信息
+-x 终端无关的进程
+	
+ps -ef		#列出进程及对应父进程
+-e 显示所有进程
+-f 所有格式
+
+#查看系统前10内存
+ps -aux --sort=-%mem | head -11
+
+#只看 PID、进程名和物理内存RSS
+ps -eo pid,comm,rss,%mem --sort=-rss | head -n 10		# -o 参数:指定格式
+------------------------
+kill 进程id	#杀死进程
+killall 进程名	#根据进程名杀死进程
+
+kill -l		#显示所有信号
+	1：SIGHUP（让一个进程不用重启，就可以重读配置文件,并使其生效）
+	2：SIGINT（ctrl+c，中断一个进程）
+	9：SIGKILL（强行杀死一个进程）
+	15:SIGTERM（终止一个进程，释放资源，默认信号）
+	#示例：
+		kill -1
+		kill -SIGUP
+--------------------------
+pkill nginx			#杀死名字里带 nginx 的所有进程
+pkill -9 chrome		#杀死所有进程及其子进程
+pkill -f app.py		#杀死与其运行的某个脚本匹配的进程
+
+sudo pkill -u testuser	#踢出用户
+sudo pkill -t pts/1		#踢出正在使用pts/1终端的用户
+------
+#常用方式:
+pgrep -a php	#列出匹配的进程和完整命令行
+pkill php		#
+------
+```
+
+**作业**
+
+```sh
+#作业
+前台作业：占据命令提示符
+后台作业：启动后，释放命令提示符，后续操作在后台完成
+前台 -> 后台：
+	ctrl+z：把正在前台的作业送往后台（此时stoped）
+	COMMAND &：让命令在后台执行
+
+jobs：查看后台所有作业
+	作业号，不同于进程号
+	+：命令默认操作的作业
+	-：命令下一次操作的作业
+	
+bg ：让后台的停止作业继续运行
+	#示例
+	bg [%JOBID]	#默认为+号作业
+	
+fg ：重新调回前台
+	#示例
+	fg [%JOBID]	#默认为+号作业
+	
+kill %JOBID		#杀死后台作业
+```
+
+### 用户
+
+用户管理
+
+```sh
+id		#查看当前用户,显示uid,gid及所属组
+finger username	#查看用户相关信息
+
+w		#查看当前系统中登录的用户,及正在干嘛
+who 	#当前登录系统的用户
+who -r	#显示当前运行级别
+whoami	#当前用户
+
+last	#最近登录及重启历史，显示的是/var/log/wtmp文件内容
+last -n 3	#最近3次登录
+
+lastlog	#每个用户上一次的登录
+lastlog -u test	#显示test用户上一次登录
+
+lastb	#显示用户错误的登录尝试，/var/log/btmp内容
+lastb -n 3	#最近3次错误登录
+
+sudo pkill -u username	#剔出某个登录用户
+sudo pkill -9 -u 用户名  #剔除并杀死其所有进程
+-------------------
+
+#查看有哪些真人用户(拥有登录bash)
+grep -E "/bin/bash|/bin/sh" /etc/passwd	
+
+#添加
+useradd		#创建用户
+useradd -m	test	#常见方式,创建test用户,-m 同时创建家目录 
+-d path		#创建时指定家目录
+-u UID		#指定用户id
+-g GID		#指定组id
+-r 			#创建系统用户
+-s path		#指定指定登录shell
+-c "注释"	  #添加注释
+
+adduser		#交互式创建
+-------------------
+#密码
+passwd 		#当前用户设置密码	
+sudo passwd username	#示例:给username用户设置密码
+sudo passwd -d username	#删除密码,使其可无密码登录,(不推荐)
+sudo passwd -l username	#锁定账户,禁止登录 -u 解锁
+-------------------
+#修改
+sudo usermod -aG 组1,组2 用户名	  #常用,追加数组 -a表示追加(否则会覆盖)
+sudo usermod -g 新组名 用户名	#修改属组
+
+sudo usermod -l 新用户名 旧用户名	#修改用户名
+sudo usermod -d /新路径 -m 用户名	  #修改主目录 -m 表示将原家目录文件一并迁移
+sudo usermod -u 新ID 用户名			#改UID
+sudo usermod -e YYYY-MM-DD 用户名	#设置过期时间
+sudo usermod -c "新备注文字" 用户名	#改备注
+-------------------
+#删除
+sudo userdel -r test		#常见方式,删除用户test及家目录
+-------------
+sudo su	#切换用户	不建议使用root用户
+sudo -l	#检查当前拥有的sudo权限
+
+#提权
+vi /etc/sudoers
+	--在行 %sudo ALL=(ALL:ALL) ALL 下面添加:
+	xxx ALL=(ALL:ALL) ALL	#xxx 为需要 sudo 权限的用户名
+=========================
+#用户组
+
+sudo groupadd groupname		#创建组
+
+sudo groupmod -n new_name old_name	#修改组名
+sudo groupmod -g 1010 groupname	#修改组id
+
+sudo groupdel groupname		#删除组 注：如果该组是某个用户的主组，则无法直接删除
+
+groups username 	#查看用户所属组
+
+sudo gpasswd -d username groupname	#将用户移出组
+=========================
+#配置文件
+
+/etc/passwd		#记录用户基本属性，每行对应一个用户 对所有用户都可读,7个字段 格式如下:
+用户名:口令:用户标识号:组标识号:注释性描述:主目录:登录Shell
+	--口令 	 #“x”或者“*” 真正口令在:/etc/shadow
+	--户标识号 #取值范围0～65 535。0(超级用户root) 1～99由系统保留(管理账号)，
+			  #普通用户的标识号从100开始。在Linux系统中，这个界限是500。
+	--组标识	#对应/etc/group文件中的一条记录。
+
+/etc/shadow
+登录名:加密口令:最后一次修改时间:最小时间间隔:最大时间间隔:警告时间:不活动时间:失效时间:标志
+
+/etc/group
+组名:口令:组标识号:组内用户列表
+=========================
+#查看用户变动日志
+
+grep "useradd" /var/log/auth.log	#示例
+grep "something" /var/log/lastlog	#示例
+```
+
+
+
+### 文件
+
+> 蓝色表示目录；
+> 绿色表示可执行文件；
+> 红色表示压缩文件；
+> 浅蓝色表示链接文件；
+> 白色表示其他文件；
+> 黄色是设备文件，包括block, char, fifo。
+
+```sh
+#示例: ls -l 显示如下:
+-rw-r--r-- 1 user group 1024 Jan 9 01:29 file.txt
+列1:	权限与类型 
+	第1位：-为文件，d为目录，l为链接。后9位：每3位一组，分别表示属主、属组、其他人的读(r)、写(w)、执行(x)权限。
+	!!!注意:当x显示位s时,意味着特殊权限,即任何用户运行该程序,都会临时获得该文件所有者的权限!
+列2: 硬链接数
+	该文件被硬链接引用的次数。若是目录，通常指其包含的子目录数。
+列3: 所有者 	#文件的属主用户名。
+列4: 所属组 	#文件所属的用户组名。
+列5: 文件大小	#默认单位为字节 (Bytes)。配合 -h 参数可显示为 KB/MB。
+列6: 修改时间 	#文件最后一次内容被修改的时间
+列7: 文件名 	#文件或目录的名称
+
+#默认情况下，ls -l 只会对旧(通常是超过6个月)的文件显示年份。若想显示年份，用以下命令
+ls -l --full-time
+ls -l --time-style="+%Y-%m-%d %H:%M"	#自定义时间
+```
+
+
+
+#### 文件操作
+
+```shell
+#查看文件状态
+stat filename
+stat --format "%U"	filename	#只查看文件名
+
+#查看文件类型
+file filename
+-------------------------
+ls 	#列出目录，参数 -a:全部文件，-d：仅列出目录，-l：列出文件属性详情，-i：显示inode节点信息
+ls -lh	#查看目录详情
+ls | head -n1	#显示第一个文件名字
+#查看目录树
+tree 
+#排序
+sort file	#目录下文件进行排序
+--------------------------
+touch filename	#创建文件 touch命令可修改文件的访问时间和修改时间
+cat [-AbEnTv] filename	#查看文件，参数 -A：列出特殊字符，-n：列出行号，-b：列出行号，空白行不显示行号
+#less命令，查看文件，比more常用，可回翻
+less filename 	# -N 参数显示行号
+head -n 5 filename 	#显示文件开始5行
+tail -f filename	#显示文件末尾，默认10行，-f参数：实时显示文件添加的内容
+-------------------------
+pwd	[-P] #显示当前目录，参数 -P：显示确实路径，而不是链接(link)路径
+
+mkdir [-mp]	目录名称	#创建目录，参数 -m：配置权限，-p：递归创建所需要的目录
+
+rmdir [-p] 目录名		#删除空目录，参数 -p:从该目录起删除多级空目录
+mktemp -d			#自动生成随机目录名
+
+cp [-adfilprsu] src dst	#复制文件或目录，参数 -i：存在则询问，-p：连同属性一起复制，-r：递归复制，-d：若为链接，复制链接属性而非文件，-a:等于-pdr
+rm [-fir] 文件或目录		#移除文件或目录，-f：强制，-i：询问，-r：递归
+mv [-fiu] src dst	#移动文件或目录，或修改名称 参数-f：强制，-i：询问，-u：src文件较新则升级
+
+#查找文件 参见bash
+find 目录 -name '文件名'
+
+#根据inode 进入目录
+cd "$(find . -inum 1234567)"
+-----------------------
+chgrp [-R] 属组名 文件名	#更改文件属组，-R：递归更改文件属组
+chown [–R] 属主名 文件名	#更改文件属主
+chown [-R] 属主名：属组名 文件名
+
+chmod [-R] xyz 文件或目录	#更改文件权限，r:4,w:2,x:1。xyz代表用户|组|其他的rwx值的和
+chmod u=rwx,g=rx,o=r  test1    # 修改 test1 权限
+chmod  a-x test1		#去掉可执行权限
+
+umask	#遮罩码，用于创建文件的默认权限（默认值减遮罩码，即默认权限）文件默认值666，目录默认值777
+```
+
+```sh
+
+#文本统计
+wc file
+cat file | wc -l	#统计行数
+
+#字符转化
+tr ”a" "A" < file	#文件里的a换成A
+```
+
+**写权限定义**
+
+```sh
+#写权限 (w) 的含义：
+文件的写权限： 决定你是否能修改这个文件的内容。
+目录的写权限： 决定你是否能修改这个目录的列表（即：在该目录下创建新文件、重命名文件、或删除文件）。
+```
+
+**特殊权限**
+
+```sh
+#添加该权限后,非权限用户也可以执行
+#运行某程序时，相应进程的属主是程序文件自身的属主，而不是启动者
+#此权限风险大，谨慎使用 
+suid		
+chmod u+s filename	#给文件添加s权限，若文件有x权限，显示为s，否则显示S
+	#示例显示：-rwsr-xr-x 1 root root 63736 7月  27  2018 /usr/bin/passwd
+
+#属组，同上
+sgid	
+
+sticky	
+	#在一个公共目录，可以创建删除自己的文件，但不能删除别人的文件
+chmod o+t dirfile	#对目录添加sticky权限	
+	
+#权限数字表示 示例
+chmod 1755 filename	#前面的1代表具有sticky权限
+chmod 3755 filename	#前面的3代表具有suid权限和sticky权限
+```
+
+
+
+#### 压缩解压
+
+```sh
+tar	#归档工具 (通常先归档,再压缩)
+-c	#创建归档
+-f	file.tar	#指定归档文件
+-x	#解开归档
+-t	#不解开，仅查看文件列表
+
+-z	#使用gzip方式压缩归档
+-j	#使用bzip2方式
+-J	#使用xz方式
+	
+#示例
+tar -czvf archive.tar.gz file1 file2 #gzip方式压缩file1 file2 2个文件
+tar -czvf test.tar.gz a.c   #压缩 a.c文件为test.tar.gz
+tar -tzvf test.tar.gz 		#列出压缩的文件
+tar -xzvf test.tar.gz 		#解压gz文件
+```
+
+```sh
+#gzip 只能压缩文件， 压缩后 后缀.gz， 
+gzip file	#压缩文件, file.gz 压缩后源文件被清除 ， 
+	-d file.gz #解压缩，解压后file.gz被清除
+	-num	#num为数字，1-9，指定压缩比，默认为6
+
+#bzip2 压缩大文件更有压缩比 只能压缩文件，后缀.bz2
+bzip2 file	#压缩文件，生成file.bz2，压缩后源文件被清除
+	-d file.bz2 #解压缩，解压后file.bz2被清除
+	-num	#num为数字，1-9，指定压缩比，默认为6
+	-k		#压缩后保留源文件
+
+#xz 只能压缩文件，后缀.xz 压缩更强悍
+xz file	#压缩文件，生成file.xz，压缩后源文件被清除
+	-d file.xz #解压缩，解压后file.xz被清除
+	-num	#num为数字，1-9，指定压缩比，默认为6
+	-k		#压缩后保留源文件
+
+```
+
+```sh
+zip		#归档压缩,压缩后不删除源文件 压缩比小
+zip file.zip file1 file2 ...	#压缩file1,file2...，到file.zip
+zip -e file.zip file.txt 	#压缩前提示输入密码	(加密压缩无法隐藏文件名)
+
+unzip file.zip		#解压
+unzip file.zip -d dir	#解压到目标文件夹
+
+unzip -l file.zip 	#只看内容,不解压
+unzip -o file.zip 	#强制覆盖已有文件(默认会询问)
+unzip -n file.zip 	#不覆盖已有文件(跳过已存在的)
+unzip -p "pass" file.zip 	#解压有密码的压缩包
+```
+
+```sh
+7z		#压缩 (默认最高压缩比)
+7z a archive.7z file1.txt folder/	#-a : 添加
+
+7z a secret.7z folder/ -p -mhe=on	#带密码,且隐藏文件名
+	-p：交互式输入密码。
+	-mhe=on：加密文件名，不输密码看不见内部列表。
+
+7z a -v100m archive.7z folder/		#分卷压缩（每个包 100MB）会生成 .7z.001, .7z.002 等文件
+
+7z x archive.7z		#解压并保持目录结构
+	-x 代表 eXtract（按完整路径解压）
+7z x archive.7z -o/path/to/directory/	#解压到指定目录 注意:-o 和路径之间没有空格
+7z x archive.7z "document.pdf"		#解压特定的文件：
+
+7z l archive.7z		#列出压缩包内容（不解压）
+7z t archive.7z		#测试压缩包是否完整/损坏
+
+7z u archive.7z file_updated.txt	#更新压缩包中的文件
+7z a archive.7z folder/ -mmt=8		#指定多线程压缩（加快速度）
+	-mmt=8 使用 8 个线程
+```
+
+
+
+#### 加密
+
+```sh
+#gpg加密
+gpg -c xx.zip	
+gpgconf --kill gpg-agent	#执行清理缓存密码,否则,解密时不需要输入密码
+gpg -d filename.gpg > filename	#解密
+
+gpg --no-use-agent -c a.zip	#或者禁用缓存方式加密
+
+
+##ssl加密
+# 加密文件
+openssl enc -aes-256-cbc -salt -in data.txt -out data.txt.enc
+# 解密文件
+openssl enc -d -aes-256-cbc -in data.txt.enc -out data.txt
+
+#给服务器发送加密数据
+echo "Hello SSL" | openssl s_client -connect 127.0.0.1:443 -quiet
+```
+
+
+
+### 磁盘
+
+#### 逻辑卷
 
 ```sh
 逻辑卷		#LV 逻辑卷之和不能超过卷组边界，每个逻辑卷相当于一个分区
@@ -87,391 +594,24 @@ lvcreate	#创建逻辑卷
 
 
 
-### 系统
-
-#### 系统信息（debian为准）
-
-```sh
-#提权使用sudo，不建议使用root用户
-#问题：xxx 不在 sudoers 文件中，此事将被报告。
-#解决：
-vi /etc/sudoers
-#找到 # Allow members of group sudo to execute any command，在 %sudo ALL=(ALL:ALL) ALL 
-#下面添加 xxx ALL=(ALL:ALL) ALL，xxx 为前面无法执行 sudo 命令的用户名
-
-shutdown -r now	#重启	如提示未找到命令，则前面加 sudo
-shutdown -r 10	#10分钟后重启
-shutdown -h now	#关机
-shutdown -h 10	#10分钟后关机
-
-man 命令	#查看命令帮助
-#快捷打开终端： `ctrl+alt+t`
-#清屏幕：`ctrl+l` 或 命令clear
-
-hostname 	#主机名 /etc/sysconfig/network
-echo $HOSTNAME	#获取当前主机名
-uname -a	#查看系统名
-cat /proc/version	#查看版本的命令
-cat /proc/cpuinfo	#查看cpu信息
-cat /proc/meminfo	#查看内存信息
-lscpu #cpu详细信息
-lsusb	#查看usb设备
-lspci	#查看所有设备信息
-
-sudo su	#切换用户，（切换的用户并不是登录用户）
-w		#查看当前系统中登录的用户,及正在干嘛
-who 	#当前登录系统的用户
-who -r	#显示当前运行级别
-whoami	#当前用户
-last	#最近登录及重启历史，显示的是/var/log/wtmp文件内容
-	-n	#显示最近几次的登录，示例： last -n 3	#最近3次登录
-lastb	#显示用户错误的登录尝试，/var/log/btmp内容
-	-n	#显示最近，示例： lastb -n 3	#最近3次
-lastlog	#每个用户上一次的登录
-	-u	#显示特定用户，示例 lastlog -u test	#显示test用户上一次登录
-basename	#
-mail	#
-
-date	#系统时间
-
-free	#查看内存 -h 友好显示
-
-top	#查看运行动态视图	
-	# 按 e 内存可mb,gb,tb等友好显示
-	# 按 shift+M 可以按内存大小排序
-
-systemctl start 服务名		#启动服务
-systemctl stop 服务名		#停止
-systemctl restart 服务名		#重启
-systemctl reload 服务名		#重载
-systemctl enable 服务名		#自动启动
-systemctl disable 服务名		#不自动启动
-systemctl status 服务名		#查看运行的服务
-systemctl list-units 服务名		#列出所有
-systemctl list-units --type=service	#查看所有服务
-systemctl list-units --type=service --state=running	#查看正在运行的服务
-systemctl list-unit-files --type=service --state=enabled	#查看开机自启的服务
-
-#锁屏快捷键
-ctrl+alt+L
-
-#锁终端
-ctrl + S	#解锁:ctrl + Q
-
-#终止进程
-ctrl+c
-
-#挂起进程
-ctrl+z		#挂起当前进程到后台(占据内存-注意),使用jobs查看 
-```
-
-#### 环境变量
-
-```sh
-env :显示所有环境变量
-set :显示本地定义的shell变量
-export :把一个变量变作环境变量, 不加参数显示哪些变量导出为用户变量
-
-#删除环境变量
-unset varname
-
-#相关文件
-/etc/profile	#环境变量
-/etc/bashrc		#shell变量
-
-#====================
-env		#查看当前用户全部环境变量
-export	#当前系统定义的所有环境变量
-echo $PATH		#查看path环境变量
-#添加环境变量
-sudo export PATH=/home/tuotu/bin:$PATH		#终端关闭失效
-#第二种方法：
-sudo vi /etc/profile
-#在文档最后，添加:
-export PATH="/home/tuotu/bin:$PATH"
-#保存，退出，然后运行：
-#source   /etc/profile
-#即可
-#====================
-
-echo $LANG	#查看编码
-
-echo $SHELL	#查看shell版本
-```
-
-#### 文件特殊权限
-
-##### 文件访问权限
-
-```sh
-#文件权限
-suid	#运行某程序时，相应进程的属主是程序文件自身的属主，而不是启动者
-	chmod u+s file	#给文件添加s权限，若文件有x权限，显示为s，否则显示S
-	此权限风险大，谨慎使用 
-	示例：-rwsr-xr-x 1 root root 63736 7月  27  2018 /usr/bin/passwd
-sgid	#属组，同上
-sticky	#在一个公共目录，可以创建删除自己的文件，但不能删除别人的文件
-	chmod o+t DIR	
-	
-#权限数字表示
-100		#代表有s权限
-示例：chmod 1755 filename	#前面的1代表具有sticky权限
-示例：chmod 3755 filename	#前面的3代表具有suid权限和sticky权限
-```
-
-##### 文件额外访问控制权限FACL
-
-```sh
-#文件为file，属主和属组都是user1 权限750
-#file user1 user1 
-#若要是user2能访问file，又没有权限修改组权限，则需要用到FACL
-
-#rwxr--r--+		#最后一个加号代表文件具有额外控制权限
-
-#用法
-getfacl filename	#查看文件的facl信息
-setfacl 	#设置facl，说明：设置的权限不能超出facl中mask的权限范围
-	-m	#设定
-		u:uid:perm	#示例：setfacl -m u:test:rw file	#设置test用户对file具有rw权限
-		g:gid:perm	#同上，组
-		d:u:uid:perm	#前面的d代表目录（只能用于目录），表示为目录下文件自动继承该权限
-		d:g:uid:perm	#同上，组
-	-x	#取消	示例：setfacl -x u:test file	#取消test用户对file的额外控制权限
- 	--mask	#设置mask 示例：setfacl --mask rw- file	#设置文件file的mask
-
-#权限检查顺序
-owner->facl,user->group->facl,group->other
-
-
-```
-
-
-
-### 用户
-
-用户管理
-
-```sh
-id	#查看账号属性
-finger username	#查看用户相关信息
-change 	#修改用户属性信息
-useradd [-cdgGsu] username	#添加用户，参数 -c：注释，-d：指定用户目录，-g：用户组
-userdel username	#删除用户，参数 -r：连同用户主目录一并删除，
-
-usermod username	#修改已有用户信息
-	usermod -aG groupname username	#将用户添加到某个组
-
-passwd [username]	#修改口令，普通用户修改自己，超级用户可修改其他用户口令，参数 -l：锁定，-u：解锁，-d：使账号无口令，-f：强迫下次登录修改口令
-
-pwck 	#检查用户账户完整性
-
-groupadd [-go] name	#添加用户组，参数 -g：指定标识号gid，-o：一般与g同时使用，表明新用户组与系统已有用户组的gid相同
-groupdel name	#删除用户组
-groupmod name	#修改用户组
-newgrp groupname	#将当前用户临时切换到groupname的用户组，前提用户确实属于该用户组或附加组
-
-/etc/passwd		#系统文件，记录用户基本属性，每行对应一个用户，含义=> 用户名:口令:用户标识号:组标识号:注释性描述:主目录:登录Shell
-#口令字段存放的只是用户口令的加密串，不是明文，但是由于/etc/passwd文件对所有用户都可读，所以这仍是一个安全隐患。因此，现在许多Linux 系统（如SVR4）都使用了shadow技术，把真正的加密后的用户口令字存放到/etc/shadow文件中，而在/etc/passwd文件的口令字段中只存放一个特殊的字符，例如“x”或者“*”
-#户标识号的取值范围是0～65 535。0是超级用户root的标识号，1～99由系统保留，作为管理账号，普通用户的标识号从100开始。在Linux系统中，这个界限是500。
-#组标识对应着/etc/group文件中的一条记录。
-#系统管理员可以根据系统情况和用户习惯为用户指定某个Shell。如果不指定Shell，那么系统使用sh为默认的登录Shell，即这个字段的值为/bin/sh。
-#用户的登录Shell也可以指定为某个特定的程序（此程序不是一个命令解释器）。
-#利用这一特点，我们可以限制用户只能运行指定的应用程序，在该应用程序运行结束后，用户就自动退出了系统。有些Linux 系统要求只有那些在系统中登记了的程序才能出现在这个字段中。
-
-#系统中有一类用户称为伪用户（pseudo users）
-#这些用户在/etc/passwd文件中也占有一条记录，但是不能登录，因为它们的登录Shell为空。它们的存在主要是方便系统管理，满足相应的系统进程对文件属主的要求。
-#伪 用 户 含 义 
-#bin 拥有可执行的用户命令文件 
-#sys 拥有系统文件 
-#adm 拥有帐户文件 
-#uucp UUCP使用 
-#lp lp或lpd子系统使用 
-#nobody NFS使用
-
-/etc/shadow
-#登录名:加密口令:最后一次修改时间:最小时间间隔:最大时间间隔:警告时间:不活动时间:失效时间:标志
-
-/etc/group
-#组名:口令:组标识号:组内用户列表
-```
-
-
-
-### 文件
-
-> 蓝色表示目录；
-> 绿色表示可执行文件；
-> 红色表示压缩文件；
-> 浅蓝色表示链接文件；
-> 白色表示其他文件；
-> 黄色是设备文件，包括block, char, fifo。
-
-```sh
-#示例: ls -l 显示如下:
--rw-r--r-- 1 user group 1024 Jan 9 01:29 file.txt
-列1:	权限与类型 
-	第1位：-为文件，d为目录，l为链接。后9位：每3位一组，分别表示属主、属组、其他人的读(r)、写(w)、执行(x)权限。
-列2: 硬链接数
-	该文件被硬链接引用的次数。若是目录，通常指其包含的子目录数。
-列3: 所有者 	#文件的属主用户名。
-列4: 所属组 	#文件所属的用户组名。
-列5: 文件大小	#默认单位为字节 (Bytes)。配合 -h 参数可显示为 KB/MB。
-列6: 修改时间 	#文件最后一次内容被修改的时间
-列7: 文件名 	#文件或目录的名称
-
-#默认情况下，ls -l 只会对旧(通常是超过6个月)的文件显示年份。若想显示年份，用以下命令
-ls -l --full-time
-ls -l --time-style="+%Y-%m-%d %H:%M"	#自定义时间
-```
-
-
-
-#### 文件操作
-
-```shell
-chgrp [-R] 属组名 文件名	#更改文件属组，-R：递归更改文件属组
-chown [–R] 属主名 文件名	#更改文件属主
-chown [-R] 属主名：属组名 文件名
-
-chmod [-R] xyz 文件或目录	#更改文件权限，r:4,w:2,x:1。xyz代表用户|组|其他的rwx值的和
-chmod u=rwx,g=rx,o=r  test1    # 修改 test1 权限
-chmod  a-x test1		#去掉可执行权限
-
-umask	#遮罩码，用于创建文件的默认权限（默认值减遮罩码，即默认权限）文件默认值666，目录默认值777
-
-ls 	#列出目录，参数 -a:全部文件，-d：仅列出目录，-l：列出文件属性详情，-i：显示inode节点信息
-ls -lh	#查看目录详情
-
-
-#cd中文目录
-ls | nl		#列出目录编号
-cd `ls | sed -n "xx,0p"`	#xx为目录的行号
-
-pwd	[-P] #显示当前目录，参数 -P：显示确实路径，而不是链接(link)路径
-mkdir [-mp]	目录名称	#创建目录，参数 -m：配置权限，-p：递归创建所需要的目录
-rmdir [-p] 目录名		#删除空目录，参数 -p:从该目录起删除多级空目录
-
-cp [-adfilprsu] src dst	#复制文件或目录，参数 -i：存在则询问，-p：连同属性一起复制，-r：递归复制，-d：若为链接，复制链接属性而非文件，-a:等于-pdr
-rm [-fir] 文件或目录		#移除文件或目录，-f：强制，-i：询问，-r：递归
-mv [-fiu] src dst	#移动文件或目录，或修改名称 参数-f：强制，-i：询问，-u：src文件较新则升级
-
-cat [-AbEnTv] filename	#查看文件，参数 -A：列出特殊字符，-n：列出行号，-b：列出行号，空白行不显示行号
-touch filename	#创建文件
-
-#查找文件 参见bash
-find 目录 -name '文件名'
-
-#查看文件类型
-file filename
-```
-
-```sh
-#查看文件状态
-stat filename
-
-#文件有3个时间
-#最后一次访问时间
-#最后一次修改时间
-#文件改变时间（属性）
-#touch命令可修改文件的访问时间和修改时间
-
-#less命令，查看文件，比more常用，可回翻
-less filename
-
-#tail命令
-tail -f filename	#显示文件，默认10行，-f参数：实时显示文件添加的内容
-
-#查看目录树
-tree 
-
-#排序
-sort file	#目录下文件进行排序
-
-#文本统计
-wc file
-cat file | wc -l	#统计行数
-
-#字符转化
-tr ”a" "A" < file	#文件里的a换成A
-```
-
-#### 压缩解压
-
-```sh
-tar		#归档压缩工具：打包 可压缩目录
-	-c	#创建归档文件
-	-f	file.tar	#指定归档后文件名
-	-x	#展开归档
-	--xattrs	#归档时保留文件扩展属性信息
-	-t	#不展开，查看归档文件列表
-	-zcf	#归档并调用gzip压缩
-	-zxf	#gzip解压缩并展开归档，可省略z
-	-jcf	#归档并调用bzip2压缩
-	-jxf	#bzip2解压缩并展开归档，可省略j
-	-Jcf	#归档并调用xz压缩
-	-Jxf	#xz解压缩并展开归档，可省略J
-	
-
-
-
-#示例
-#tar -czvf archive.tar.gz file1 file2 dir1
-tar -czvf test.tar.gz a.c   #压缩 a.c文件为test.tar.gz
-tar -tzvf test.tar.gz 		#列出压缩的文件
-tar -xzvf test.tar.gz 		#解压文件
-
-```
-
-```sh
-#gzip 只能压缩文件， 压缩后 后缀.gz， 
-gzip file	#压缩文件, file.gz 压缩后源文件被清除 ， 
-	-d file.gz #解压缩，解压后file.gz被清除
-	-num	#num为数字，1-9，指定压缩比，默认为6
-
-#bzip2 压缩大文件更有压缩比 只能压缩文件，后缀.bz2
-bzip2 file	#压缩文件，生成file.bz2，压缩后源文件被清除
-	-d file.bz2 #解压缩，解压后file.bz2被清除
-	-num	#num为数字，1-9，指定压缩比，默认为6
-	-k		#压缩后保留源文件
-
-#xz 只能压缩文件，后缀.bz2 压缩更强悍
-xz file	#压缩文件，生成file.xz，压缩后源文件被清除
-	-d file.xz #解压缩，解压后file.xz被清除
-	-num	#num为数字，1-9，指定压缩比，默认为6
-	-k		#压缩后保留源文件
-
-```
-
-```sh
-zip		#归档压缩,压缩后不删除源文件 压缩比小
-zip file.zip file1 file2 ...	#压缩file1,file2...，到file.zip
-unzip file.zip		#解压
-unzip file.zip -d dir	#解压到目标文件夹
-
-unzip -l file.zip 	#只看内容,不解压
-unzip -o file.zip 	#强制覆盖已有文件(默认会询问)
-unzip -n file.zip 	#不覆盖已有文件(跳过已存在的)
-unzip -p "pass" file.zip 	#解压有密码的压缩包
-```
-
-```sh
-cpio	#归档命令，同tar，不过更古老
-```
-
-
-
-### 磁盘
-
 #### 磁盘操作命令
 
 ```sh
-df [-ahikHTm] [目录或文件名]	#列出文件系统的整体磁盘使用量
-# -a：列出所有，-k：以kb显示，-m：以mb显示，-h：以易阅读格式显示，-H：1000取消1024进位，-T：显示文件系统类型，-i：以inode数量显示
+# -k：以kb显示，-m：以mb显示，-h：以易阅读格式显示，-H：1000取消1024进位，-T：显示文件系统类型，-i：以inode数量显示
+df -h	#显示磁盘情况
+df -i	#显示inode使用情况
+df /home	#显示/home目录所在分区
+df -h -x tmpfs -x devtmpfs	#只看物理分区 (排除虚拟文件系统)
 
-du [-ahskm] 文件或目录名称		#检查空间使用量
-# -a：列出所有文件和目录容量，-h：易读格式，-s：列出总量，-S：不包括子目录的总计
-du -h --max-depth=1		#列出当前目录各文件大小
-du -sh .	#查看当前目录大小
+
+du filename		#检查空间使用量
+# -h：易读格式，-s：列出总量
+du -sh .			#查看当前目录总大小
+du -sh * 			#常用,显示当前目录下各文件大小(包括目录的总大小)
+du -sh .[^.]* *		#显示当前目录文件大小,包括隐藏文件
+du -sh * | sort -hr	#显示当前目录文件,大小排序
+
+
 
 #fdisk：用于磁盘分区
 fdisk -l	#列出分区信息
@@ -497,13 +637,13 @@ partprobe
 
 ```
 
-##### 挂载
+**挂载**
 
 ```sh
 #查看挂载,相关命令：
 mount
 df -h
-lsblk
+lsblk	#分区信息
 
 #挂载 将文件系统关联到根目录
 #语法：
@@ -527,7 +667,8 @@ umount /dev/hdc6	#示例
 #重新挂载
 mount -o remount 设备 挂载点
 
-
+#永久挂载：
+修改 /etc/fstab
 ```
 
 ```sh
@@ -701,7 +842,7 @@ swap
 
 ```
 
-##### 创建文件系统
+**创建文件系统**
 
 ```sh
 #查看当前内核支持的文件系统
@@ -795,41 +936,117 @@ swapon -a
 
 ### 网络
 
-```shell
+#### 网络配置
 
-#网络服务状态
-systemctl status networking
+```sh
+#ip link 显示和管理网络接口链接状态，用于查看系统内部物理/虚拟链接列表、启用/禁用接口
+ip link show	#查看所有接口列表和状态
+ip link show eth0	#查看单个接口 eth0(名字) 的详情
+ip link set <接口> up/down	#启用/禁用接口
+	sudo ip link set eth0 down	#示例: 禁用接口（修改
 
-ifconfig	#查看网络信息（旧命令）
-ip addr		#(debian用)同上，如果上面命令未找到
 
-#设置ip命令（本次设置有效）
-ip addr add new_ip/mask dev ethx	#ethx：网卡名称
-sudo ip link set dev ethx up	#使更改生效
+sudo ip link add dummy0 type dummy	#新增虚拟接口dummy0(名称)
+sudo ip link del dummy0				#删除虚拟接口
+-------------------------
+#ip addr 显示和管理 IP 地址配置，用于内网/系统链接的 IP 分配
+ip addr show	#查看所有接口的 IP 列表
+ip addr add <IP/掩码> dev <接口>	#设置 IP
+	#示例
+	sudo ip addr add 192.168.1.10/24 dev eth0	# 给ecth0网口设置ip为192.168.1.10
+	sudo ip link set dev eth0 up	#使更改生效
+sudo ip addr del 192.168.1.10/24 dev eth0	#删除特定 IP
+sudo ip addr flush dev eth0			#清除接口所有 IP
 
-#端口
-netstat		#查看网络连接信息
-ss  #(debian用)同上
-ss -tunlp	
-#-t表示列出TCP协议的信息
-#-u表示列出UDP协议的信息
-#-n表示数字方式显示IP和端口
-#-l表示只列出监听状态的网络连接
-#-p表示列出占用该端口的进程信息
+#一块网卡可以有多个地址,示例:
+eth0:0
+eth0:1
+------------------
+nmcli device status		#查看所有设备列表
+
+```
+
+#### 内网管理
+
+```sh
+#arp 
+arp -a 	#显示所有 ARP 条目
+
+ip neigh show	#同arp -a,显示内网设备(邻居)
+-add <IP> lladdr <MAC> dev <接口>	#新增静态条目
+	sudo ip neigh add 192.168.1.100 lladdr 00:11:22:33:44:55 dev eth0	#示例:新增静态 ARP
+
+sudo ip neigh del 192.168.1.100 dev eth0	#删除特定条目
+sudo ip neigh flush dev eth0				#清除接口所有 ARP
+------------------
+#ip route 查看和管理路由表，用于内网/互联网流量控制
+ip route show	#查看所有路由列表
+-add <网络/掩码> via <网关> dev <接口>	#新增路由
+	sudo ip route add 192.168.2.0/24 via 192.168.1.1 dev eth0	#示例:新增内网路由
+-del <网络/掩码>	#删除路由
+	sudo ip route del 192.168.2.0/24	#示例: 删除路由
+-replace <网络/掩码> via <新网关>		#修改路由
+	sudo ip route replace 192.168.2.0/24 via 192.168.1.2	#示例:修改路由
+-------------------
+nmcli connection show		#显示所有连接
+```
+
+#### 互联网管理
+
+```sh
+#ping 测试主机连通性
+ping 192.168.1.1	#单个内网网关测试（无限，直到 Ctrl+C）
+ping -c 4 www.google.com	#测试 4 次互联网连通性
+-i <间隔>	#间隔秒数。
+-s <大小>	#数据包大小。
+--------------
+#traceroute 跟踪到目标的路由路径，用于诊断互联网链接问题
+traceroute www.google.com	#显示到目标的路由列表和延迟
+traceroute -n 8.8.8.8	#快速数字追踪
+-m <最大跳>	#最大跳数
+-n				#不解析主机名（数字输出,速度快)
+--------------
+#dig 查询 DNS 记录，用于互联网域名解析管理。
+dig www.example.com	#查询域名 IP（详细）
+-+short	#简短输出
+	dig +short MX example.com	#示例:查看邮件记录列表
+@<服务器>	#指定 DNS 服务器
+	dig @8.8.8.8 A example.com	#示例:使用 Google DNS 查询单个 A 记录
+ANY	#查询所有类型
+	dig @8.8.8.8 ANY example.com
 
 host 域名	#查询域名对应ip
-nslookup 域名	#同上
-
-lsof	#命令是一种列出系统文件信息的命令，同时也可以列出进程信息，包括占用端口的进程信息。
-sudo lsof -i :80 	#列出80端口的信息
-
 
 #指定本机解析
 /etc/hosts
+-------------
+nmcli radio			#查看无线状态
+nmcli radio wifi	#查看wifi
+wifi connect <SSID> password <密码>	#连接（新增）
+	nmcli device wifi connect MyWiFi password 'pass123'	#示例:新增并连接 SSID
+	
+---------------
+#网络服务状态
+systemctl status networking
+```
 
-#一块网卡可以有多个地址
-eth0:0
-eth0:1
+#### 网络连接情况
+
+```sh
+#ss （推荐取代 netstat）显示网络连接、端口和套接字，用于查看活跃链接和任务
+ss -tunlp	#查看端口开放
+-t 	表示列出TCP协议的信息
+-u	表示列出UDP协议的信息
+-n	表示数字方式显示IP和端口
+-l	表示只列出监听状态的网络连接
+-p 	表示列出占用该端口的进程信息
+
+netstat	-antp	#查看网络连接信息
+--------------------
+sudo lsof -i		#查看所有网络连接列表
+sudo lsof -i :80	#查看单个 80 端口进程
+sudo lsof -i TCP	#查看 TCP 连接
+
 ```
 
 #### 防火墙
@@ -852,204 +1069,148 @@ sudo ufw deny smtp 		#禁止外部访问smtp服务
 #------
 ```
 
-### 进程
-
-```sh
-内核调度（进程管理结构表）
-应用程序->进程（指令，堆栈，共享对象映射，变量，内存页框，上下文）
-内存管理单元（MMU）
-多核cpu
-多进程，多线程（线程锁）
-睡眠（场景：当执行的进程需要加载额外的io资源时，由于io速度慢，进程转入睡眠，交出cpu资源）
-僵尸（进程运行结束，内存没有释放）->内存泄漏
-
-进程优先级：
-0-99：内核调整
-100-139：用户可控制
-
-进程间通信：（IPC）
-	共享内存
-	信号（Signal）
-	Semaphore（旗语）
-
-```
-
-#### common
-
-```sh
-pstree	#进程树
-
-ps -aux		#查看当前登录用户所有进程
-	a:		#所有与终端有关的进程
-	u:		#显示启动进程的用户信息
-	x:		#所有与终端无关的进程
-	
-ps -ef		#列出进程及对应父进程
-	e:		#显示所有进程
-	f:		#所有格式
-
-进程状态字段：
-	D：不可中断的睡眠
-	R：运行或就绪
-	S：可中断的睡眠
-	T：停止
-	Z：僵死
-	<：高优先级
-	N：低优先级
-	+：前台进程组中的进程
-	l：多线程进程
-	s：会话进程的首进程
-	
-top：	#进程动态显示
-	M：根据驻留内存大小进行排序
-	P：根据CPU使用百分比排序
-	T：根据累计时间进行排序
-	
-	-d：指定延迟时长，单位秒
-	-b：批模式
-	-n #：在批模式，共显示多少批(#为数字，翻页)
-	
-kill 进程id	#杀死进程
-killall 进程名	#根据进程名杀死进程
-
-kill -l		#显示所有信号
-	1：SIGHUP（让一个进程不用重启，就可以重读配置文件,并使其生效）
-	2：SIGINT（ctrl+c，中断一个进程）
-	9：SIGKILL（强行杀死一个进程）
-	15:SIGTERM（终止一个进程，释放资源，默认信号）
-	#示例：
-		kill -1
-		kill -SIGUP
-
-
-#查看系统前10内存
-ps -aux --sort=-%mem | head -11
-
-#只看 PID、进程名和物理内存 RSS
-ps -eo pid,comm,rss,%mem --sort=-rss | head -n 10		# -o 参数:指定格式
-
-```
-
-```sh
-#作业
-前台作业：占据命令提示符
-后台作业：启动后，释放命令提示符，后续操作在后台完成
-前台 -> 后台：
-	ctrl+z：把正在前台的作业送往后台（此时stoped）
-	COMMAND &：让命令在后台执行
-
-jobs：查看后台所有作业
-	作业号，不同于进程号
-	+：命令默认操作的作业
-	-：命令下一次操作的作业
-	
-bg ：让后台的停止作业继续运行
-	#示例
-	bg [%JOBID]	#默认为+号作业
-	
-fg ：重新调回前台
-	#示例
-	fg [%JOBID]	#默认为+号作业
-	
-kill %JOBID		#杀死后台作业
-```
-
-```sh
-vmstat	#显示系统状态信息
-vmstat 1 #每隔1秒显示1次
-vmstat 1 5 #每隔1秒显示1次，共显示5次
-```
-
 ### 任务计划
 
-#### common
+#### at
 
 ```sh
-#1,未来的某个时间执行一次任务
-	#at命令
-	#语法：
-		at 时间
-			绝对时间：HH:MM, DD.MM.YY MM/DD/YY
-			相对时间：now+#
-				单位：minutes，hours，days，weeks
-		at> COMMAND		#输入命令
-		at> Ctrl+d		#结束命令
-		
-		at -ls		#显示at任务
-		
-		#权限
-		/etc/at.deny
-		
-	#batch命令 （不需选择时间，自动选择系统空闲时执行），语法格式同at
-	
-#2，周期性的执行某个任务
-	#cron命令 (cron自身是一个不间断运行的服务：crond)
-		#系统cron，位于/etc/crontab
-			#格式：分钟 小时 天 月 周 用户 任务
-				#时间有效取值
-				分钟：0-59
-				小时：0-23
-				天：1-31
-				月：1-12
-				周：0-7	（0和7都表示周日）
-				#时间通配表示：
-				*：对应所有有效取值
-					13 12 * * *		#示例：每天12点13分
-				,:离散时间点取值
-                	10,40 * * * *	#示例，每小时第10分钟，第40分钟执行
-                -：连续时间的
-                	10 02 * * 1-5	#示例，周1到周5的2点10分
-                /#：对应取值范围内每多久一次
-                	*/3 * * * *		#示例，每3分钟一次
-                
-          	#执行结果以邮件形式发送给管理员
-                */3 * * * * /bin/cat /etc/fstab &> /dev/null	#不发邮件
-                */3 * * * * /bin/cat /etc/fstab > /dev/null	#仅错误结果发邮件
-            #环境变量：PATH环境变量指定路径（/bin:/sbin:/usr/bin:/usr/sbin）
-                	
-		#用户cron，位于/var/spool/cron/USERNAME
-			#格式：分钟 小时 天 月 周 任务
-			#用户任务的管理
-				crontab 
-					-l:		#列出当前用户所有cron任务
-					-e：		#编辑
-					-r：		#移除
-					-u USERNAME：		#管理其他用户的cron任务
-			
-			
-	#anacron命令，cron的补充，能够实现cron实现因为各种原因(如关机)未执行的任务恢复执行一次
-		#/etc/anacrontab
-			1 65 cron.daily run-parts /etc/cron.daily	#示例，已经1天每执行，将在开机后65分钟执行
+#在未来某个时间执行一次任务 
+# 安装命令: sudo apt install at
+#确保 atd 服务已启动。可通过 systemctl status atd 查看
+#权限 /etc/at.allow 和 /etc/at.deny 文件可以限制哪些用户有权使用 at 命令。
 
+#先输入at命令,然后在交互界面输入要执行的命令:
+at 时间		
+	#时间格式 HH:MM, DD.MM.YY MM/DD/YY 或 
+	#相对时间:now+#[minutes，hours，days，weeks]
+at> COMMAND		#在交互界面输入命令
+
+#管道方式执行
+echo "sh /root/script.sh" | at 23:00	#示例
+echo "sh /root/script.sh" | at 23:00 ,2026-05-20	#示例
+# -f 参数:直接执行脚本文件内容
+at 04:00 PM tomorrow -f my_task.sh	#明天下午4点
+
+#查询当前等待执行的任务及id
+at -l		# 或atq
+#删除
+at -d [ID]
+#查看具体内容
+at -c [ID]
+```
+
+#### systemd-run
+
+```sh
+是 Linux 原生替代 at 的首选
+#10分钟后执行一次任务
+systemd-run --user --on-active=10min /home/user/myscript.sh
+#30秒后
+systemd-run --user --on-active=30s /usr/bin/touch /tmp/hello
+#在特定时间执行：
+systemd-run --user --on-calendar="2026-05-20 15:30:00" /usr/bin/touch /tmp/testfile
+
+#查看
+systemctl --user list-timers	#查看所有
+
+#取消
+systemctl --user stop run-u123.timer	#取消 "run-u123.timer"
+```
+
+#### cron
+
+```sh
+#周期性的执行某个任务 (已分钟为单位)
+#cron自身是一个不间断运行的服务：crond
+#查看服务: sudo systemctl status cron
+=========================
+#cron 的配置存储在名为 /etc/crontab 的文件中。
+编辑任务：crontab -e（初次使用会让你选编辑器，建议选 nano 或 vim）
+查看任务：crontab -l
+删除所有任务：crontab -r
+管理其他用户的任务（需 root）：sudo crontab -u 用户名 -e
+=========================
+#语法格式
+ ┌───────────── 分钟 (0 - 59)
+ │ ┌─────────── 小时 (0 - 23)
+ │ │ ┌───────── 日 (1 - 31)
+ │ │ │ ┌─────── 月 (1 - 12)
+ │ │ │ │ ┌───── 星期 (0 - 6，0 是周日)
+ │ │ │ │ │
+ * * * * *  [要执行的命令]
+
+*：匹配所有可能的值（每...）。
+,：指定多个值（如 1,3,5 表示第1、3、5）。
+-：指定范围（如 1-5 表示周一到周五）。
+/：指定步长（如 */10 表示每隔10个单位）。
+
+#示例:(必须使用绝对路径)
+* * * * * /usr/bin/php /var/www/task.php	#每分钟执行一次
+30 2 * * * /home/user/backup.sh				#每天凌晨 2:30 执行
+0 * * * * /usr/bin/python3 /script.py		#每小时执行一次（整点）
+0 */5 * * * /path/to/command				#每隔 5 小时的第 0 分钟执行
+0 8 * * 1-5 /path/to/command				#每周一至周五的早上 8 点执行：
+	
+```
+
+#### sleep
+
+```sh
+#Sleep + 后台运行（最简单的临时方案）
+#示例bash代码:
+(sleep 1h; /path/to/script.sh) &
+
+#如果终端关闭或系统重启，任务会丢失。
 ```
 
 ### 日志系统
 
-#### common
-
 ```sh
 #syslog服务,包括2个进程：
-	syslogd：非内核其他设施产生日志
-		/var/log/messages：系统标准错误日志信息
-		/var/log/maillog：邮件系统产生的日志信息
-		/var/log/secure：
-	klogd：内核产生日志 （记录到/var/log/dmesg）
-	
-#日志滚动（日志切割）
+syslogd：非内核其他设施产生日志
+	/var/log/messages：系统标准错误日志信息
+	/var/log/maillog：邮件系统产生的日志信息
+	/var/log/secure：
+klogd：内核产生日志 （记录到/var/log/dmesg）
+```
 
-#日志记录格式示例（/etc/syslog.conf）
-mail.info /var/log/mail.log		#表示将mail相关，级别为info及以上的信息记录到/var/log/mail.log文件中
-auth.=info @10.0.0.1			#表示将auth相关的，级别为info的信息记录到10.0.0.1主机上（该主机需配置配置文件）
-user.!=error					#表示记录user相关，不包括error级别的信息
-user.!error						#表示与user.error相反
-*.info							#表示记录所有info及以上级别的信息
-mail.*		-/var/log/mail.log	#记录mail相关的所有日志信息（异步写入）
-*.*								#记录所有级别日志信息
-cron.info;mail.info				#记录多个日志信息，cron和mail
-cron,mail.info					#同上
-mail.*;mail.!=info				#记录mail所有级别信息，不包括info级别
-*.emerg		*					#emerg信息，立即发给所有用户
+```sh
+/var/run/utmp		当前登录会话	#命令:w who users
+/var/log/wtmp		历史登录记录	#命令:last	
+/var/log/btmp		登录失败记录	#命令:lastb
+/var/log/lastlog	每个用户最后登录时间	#命令:lastlog
 
-	
+~/.bash_history		命令历史	#命令:history
+/var/log/auth.log	SSH相关日志	#命令:grep sshd /var/log/*
+
+/var/log/messages 	系统综合日志 可能包含登录、sudo、su等记录	#命令:journalctl
+```
+
+```sh
+#文本日志 (Logrotate)
+清理周期：通常是 每周 (Weekly)。
+
+#查看文本日志总大小
+sudo du -sh /var/log
+
+====================
+#二进制日志 (Journald)
+按空间占用清理:占用磁盘总量的 10% 左右，或者达到 4GB 时开
+
+#查看当前日志占用总量
+journalctl --disk-usage
+
+#强制清理 Journal 日志（只保留最近 2 天）
+sudo journalctl --vacuum-time=2d
+# 示例:只保留最近 500M 的系统日志，其余自动删除
+sudo journalctl --vacuum-size=500M
+===================
+dmesg -H	#内核缓冲日志,-H 人类可读
+```
+
+### 备份还原
+
+```sh
+rsync
 ```
 

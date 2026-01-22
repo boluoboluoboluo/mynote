@@ -217,15 +217,5 @@ run getui -u pinginglab -p cisco #添加账号密码
 
 
 
-linux远程登陆
 
-```sh
-rdesktop x.x.x.x
-```
-
-
-
-使用LC5容笑汉化版，windows下破解账户hash
-
-可百度下载
 

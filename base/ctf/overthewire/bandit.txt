@@ -1,0 +1,109 @@
+level1:
+	描述:如何打开名称为 - 的文件,获取密码
+	思路:shell将 - 解释为标准输入,无法直接打开:
+	cat -		#失败
+	cat ./-	#成功	创建: touch ./-
+	cat -- -	#成功	
+	more -	#成功
+
+leve4:
+	描述:inhere目录一些文件 -file00 -file01 -file02 ...,cat查看乱码
+	思路:file -- -file00 查看类型为data,二进制文件,strings命令提取文本
+	strings ./*	#一键提取,可看到password
+
+level5:
+	描述:inhere目录很多子目录和文件,根据条件查找:1033字节,可读,不可执行的文件
+	思路:find . -type f -size 1033c ! -executable
+
+level8:
+	描述:查找文件中只出现一次的行(即没有重复过的行)
+	思路:先排序sort ,然后去重uniq
+	sort data.txt | uniq -u		#-u参数表示仅显示非重复行
+
+level11:
+	描述:数据中的小写和大写字母全部往前移了13位(rotate),解码后查看
+	思路:'N-ZA-Mn-za-m'：替换映射（大写 A-M → N-Z，大写 N-Z → A-M；小写同理）。
+	答案:cat data.txt | tr 'A-Za-z' 'N-ZA-Mn-za-m'
+level12:
+	描述:一个经过的多次压缩的文件,cat查看是16进制的文件(含地址,HEX,ascii)
+	思路:copy到/tmp/tmpxxxx,转二进制文件,然后查看文件类型(压缩),然后不停改后缀,解压
+	答案:
+		cd /tmp			
+		mktemp -d		#生成随机目录
+		xxd -r data.txt > data.bin	#转二进制
+		file data.bin		#查看类型,发现是gz压缩
+		mv data.bin data.gz
+		gzip -d data.gz	#解压
+		重复上面步骤,注意识别解压方式gzip,bzip2,tar
+level13:
+	描述:ssh私钥登录
+	命令:ssh -i ./id_rsa username@host
+level14:
+	描述:将密码提交到本地30000端口
+	命令:cat /etc/bandit_pass/bandit14 | nc localhost 30000
+level15:
+	描述:将数据通过ssl加密方式提交到端口30001
+	命令:echo "xxx" | openssl s_client -connect 127.0.0.1:30001 -quiet
+level16:
+	描述:扫描31000-32000,开放端口,ssl加密通道发送数据,
+	思路:先nmap扫描拿到开放的端口,然后openssl 发送临时数据,如果返回数据错误,则定位该端口,发送正确数据
+	命令:nmap -sV -p 31000-32000 127.0.0.1
+level17:
+	描述:查看2个文件中非重复的行
+	思路:diff命令查看不同的地方
+	命令:diff passwords.old passwords.new
+level18:
+	描述:服务器ssh连接时秒退,如何获取readme文件内容
+	思路:ssh username@ip -p port 'cat readme'	#ssh 只执行命令,不登录,执行后回显内容
+level19:
+	描述:服务器文间banditdo,设置了suid
+	思路:ls查看,发现x变成s,可通过它执行bandit20用户权限
+	答案:./banditdo cat /etc_pass/bandit20
+level20:
+	描述:服务器有个命令文件,它可以连接指定的某个端口,如果那个端口发了旧密码数据,它就会返回新密码
+	思路:nc监听,转入后台,然后使用提供的文件连接监听端口,nc监听端口发数据,收到返回
+	答案:echo "xxx" | nc -l 10000 &		#使用jobs查看后台作业
+		./suconnect 10000	
+		fg [JobId]	#切换到前台,可看到返回数据
+level23:
+	描述:服务器定时任务执行删除某目录下的文件,如果文件所有者是bandit23,则执行(60秒超时)
+	思路:在该目录下编写bash脚本,获取,数据写入tmp目录
+	关键:temp目录现创建临时目录,并赋予755权限,编写的脚本赋予x权限
+level24:
+	描述:服务器监听端口30002,它只有收到特定数据才会返回正确结果
+	思路:编写shell脚本,exec 3<>/dev/tcp/ip/port 建立连接,然后不断发送数据,知道返回Correct为止
+	答案:脚本参见level25.sh.txt
+level25:
+	描述:ssh连上,只有一个sshkey文件,通过这个key连bandit26时,返回一大串信息后就closed
+		连bandit25,检查/etc/passwd,查看bandit26的shell,发现shell是/usr/bin/showtext	#不是默认的bash	
+		查看/usr/bin/showtext,发现more命令	
+	思路:在linux中,程序输出内容多,会使用more来分屏显示,more会暂停等待用户输入,
+		而在more的状态下,可以按v进入vi编辑器,在里面可以执行系统命令
+	答案:
+		1.缩小终端窗口(足够小),再连ssh,然后触发more
+		2.按v进入vi编辑器,执行":set shell=/bin/bash"
+		3.再接着执行":shell",成功绕过限制,获得bash shell
+		4.发现一个有SUID权限的bandit27-do文件	
+			执行: ./bandit27-do cat /etc/bandit_pass/bandit27		#获取下一关密码
+level27:
+	描述:服务器上又git仓库,克隆仓库,获取下一关密码
+	思路:从本地克隆,git clone ssh://bandit27-git@bandit.labs.overthewire.org:2220/home/bandit27-git/repo
+		根据提示输入密码即可
+level30:
+	描述:clone仓库后,没有别的分支,没有其他提交历史,文件内容不相干
+	思路:tag
+		git  tag	#查看所有tag
+		git show tagname	#查看tag内容
+level31:
+	描述:clone仓库后,readme文件提示需要key.txt
+	思路:提交key.txt,需要修改.gitignore,注释*.txt, 或者使用-f强制提交
+	命令:git add -f key.txt
+		git -m "xxx"
+		git push
+level32:
+	描述:登录后,是一个其他shell,提示UPPERSHELL,输入都会变成大写
+	思路:服务器的shell通过执行一个转大写的脚本,运行该进程,需要获取当前shell
+	答案:$0	#当前进程名字,此处即当前shell
+
+
+

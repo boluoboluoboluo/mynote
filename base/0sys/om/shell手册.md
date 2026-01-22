@@ -26,7 +26,8 @@ EOF
 '
 
 chmod +x ./test.sh		#使脚本具有执行权限
-./test.sh		#执行脚本
+./test.sh		#执行脚本 
+bash ./test.sh	#执行脚本 -t 检测错误
 
 #另一种执行方式
 /bin/sh test.sh	#此时不需要在第一行指定解释器信息
@@ -42,7 +43,7 @@ $#		#传递到脚本得参数个数
 $*	#输出所有参数
 $$	#当前进程id
 $!	#后台运行得最后一个进程id
-
+$? 	#上一个命令执行状态返回值0-255，0为成功
 
 
 a=1		#等号两边无空格，bash进程有效
@@ -58,16 +59,29 @@ unset a	#删除变量（不能删除只读变量）
 ##### 字符串
 
 ```shell
-str="abcd"
+str="abcd"		
 echo ${#str}	#获取字符串长度
-echo "xxx"$str	#字符串拼接
+echo "${str}xxx"	#字符串拼接
 echo ${str:1:2}	#提取子串，索引1开始提取2个，为bc
 ```
+
+##### 循环
+
+```sh
+#示例
+declare -i SUM=0
+for i in {1..100};do
+	let SUM=$SUM+$i
+done
+```
+
+
 
 ##### 数组
 
 ```shell
 arr=(1 2)	#定义数组
+arr2=({0..100})	#数组 0-100
 arr[2]='a'
 ${arr[1]}	#读取数组
 ${arr[@]}	#获取数组所有元素
@@ -84,9 +98,32 @@ echo ${#site[*]}	#获取数组长度
 
 ```
 
+##### 算术运算
+
+```sh
+#声明
+declare -i SUM	#声明SUM为整型
+
+#1.使用let
+a=1
+b=2
+let c=$a+$b
+echo $c
+
+#2.使用$[]
+c=$[$a+$b]
+
+#3.使用$(())
+c=$(($a+$b))
+
+#4. expr
+c=`expr $a + $b`	#注意空格
+```
+
 ##### 运算符
 
 ```shell
+
 val=`expr 2 + 2`		#加法，+号两边有空格
 echo "两数之和为 : $val"
 
@@ -95,7 +132,7 @@ val=`expr $a - $b`
 val=`expr $a \* $b`
 val=`expr $b / $a`
 val=`expr $b % $a`
-if [ $a == $b ]
+if [ $a = $b ]
 then
 else
 fi
@@ -118,7 +155,7 @@ if [ $a -lt 100 -o $b -gt 100 ]	#a>100 或 b大于100 ，或
 if [[ $a -lt 100 && $b -gt 100 ]]		#逻辑and
 if [[ $a -lt 100 || $b -gt 100 ]]		#逻辑or
 #字符串运算
-if [ $a == $b ]		#检查是否相对
+if [ $a = $b ]		#检查是否相对
 if [ $a != $b ]		#不相等
 if [ -z $a ]		#字符串长度是否为0
 if [ -n "$a" ]		#字符串长度是否不为0

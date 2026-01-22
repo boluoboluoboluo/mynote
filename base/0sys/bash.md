@@ -16,14 +16,17 @@ I/O重定向
 < 输入重定向
 2> 重定向错误输出
 2>> 重定向错误追加输出
-&> 重定向标准和错误输出
-
-2>&1 #错误重定向到标准输出
+-------------
+#2者等价,重定向标准和错误输出
+&> 		#格式: command &> file.txt
+2>&1 	#格式: command > file.txt 2>&1
+-------------
 
 set -C 禁止对已存在文件使用覆盖重定向
 >| 强制覆盖
 
 管道：前一个命令的输出，作为后一个命令的输入
+语法:命令1 | 命令2	#管道后必须接命令
 echo "hello" | tr 'a-z' 'A-Z'		#hello 转为 HELLO
 
 #不显示
@@ -112,73 +115,13 @@ EOF
 		shift 2	#踢出2个参数，此时$1表示第3个参数
 	特殊变量 
 		$? 	#上一个命令执行状态返回值0-255，0为成功
+		$$	#当前进程id
+		$!	#后台运行得最后一个进程id
 		$#	#表示参数个数
 		$* 	#参数列表
 		
 		$_	#上一个命令的最后一个参数	#如果只有命令,那就是命令本身,如果是引号,则为引号里的内容
 	
-#声明
-declare -i SUM	#声明SUM为整型
-```
-
-```sh
-#变量长度
-${#var}
-#变量赋值
-${var:-word}	#如果var为空或未定义，则变量展开为word，否则，展开为var
-${var:+word}	#如果var为空或未定义，不做任何操作，否则展开为word
-${var:=word}	#如果var为空或未定义，则变量展开为word，并将展开后的值赋值给var
-
-#取子串
-${var:offset}	#从偏移offset处取子串
-${var:offset,length}	#
-
-```
-
-
-
-
-
-### 循环
-
-```sh
-#示例
-declare -i SUM=0
-for i in {1..100};do
-	let SUM=$SUM+$i
-done
-```
-
-### 列表
-
-```sh
-#定义方式
-a=(1 2 3)
-a=({1..100})	#自动展开1-100
-a=(`seq 1 100`)	#采用序列生成
-#读取
-echo ${a[2]}
-```
-
-### 关系运算
-
-#### 算术运算
-
-```sh
-#1.使用let
-a=1
-b=2
-let c=$a+$b
-echo $c
-
-#2.使用$[]
-c=$[$a+$b]
-
-#3.使用$(())
-c=$(($a+$b))
-
-#4. expr
-c=`expr $a + $b`	#注意空格
 ```
 
 
@@ -189,16 +132,19 @@ c=`expr $a + $b`	#注意空格
 
 ```sh
 witch 命令	#命令路径
+whereis 命令	#命令相关文件位置
 whatis 命令	#命令属性
 type 命令		#命令类型	，然后用 help 命令 或者 man 命令	查看命令文档
- 
+----------------
+command &	#命令后面加 & 表示让命令后台运行
+
 #命令替换
 ``
-ls -l `which useradd`		#示例
-#命令替换 (取代上面的``)
-$()
+$()		#同上, 现取代上面	
 $(command) 	#的作用是：先执行括号内的命令，然后将该命令的输出（结果）放回到原处，作为外层命令的参数
-
+$(IFS=];b=ls]test;$b)		#等同于: ls test 	
+	#实际上IFS以]为分割符,将 ls]test 分割成2部分ls 和 test 传给shell,执行时
+	#Shell 尝试运行第一个片段（ls），并将后续片段（test）作为参数传给它
 
 "" ：弱引用，可以实现变量替换
 '' ：强引用，不完成变量替换
@@ -206,11 +152,7 @@ $(command) 	#的作用是：先执行括号内的命令，然后将该命令的�
 #命令历史
 history
 history -c		# 清楚命令历史 (输入命令时前面加空格可不留历史)
-history -d num	# 清楚某个命令
-
-#输出
-echo hello	
-echo -n hello	#不换行
+history -d num	# 清除某个命令
 
 #相当于windows下cls
 printf "\033c"
@@ -220,15 +162,15 @@ basename 	#获取当前文件名
 basename `pwd`	#当前目录名
 basename $0	#命令本身或脚本文件本身
 
-#查看文件状态
-stat file
-
 #计算器 scale=2 保留2位精度， quit退出
 bc
 bc <<< "scale=2;111/22;"	
 
 #排序
 sort
+sort -u a.txt b.txt			#取并集
+sort a.txt b.txt | uniq		#取交集
+sort data.txt | uniq -u		#仅显示非重复行(即只出现过一次,没有重复过的行)
 
 #显示头部行数
 head -1 filename	#显示一行
@@ -236,12 +178,6 @@ head -1 filename	#显示一行
 #显示文件行数，字符，字节
 wc filename
 ls | wc -l	#统计文件数量
-
-#转大写
-echo "hello" | tr a-z A-Z
-
-#文件内容类型
-file filename
 
 #cut命令 显示文件指定分隔符隔开的字段数据，默认分隔符为空格
 cut -d : -f1 filename	# -d 指定分隔符为：，-f 1,3 第1,3个字段
@@ -269,39 +205,74 @@ echo $RANDOM	#显示一个随机数
 **/ (双星号)：匹配当前层、下一层、下下层……直到最底层的所有目录。	#递归通配符
 ```
 
+#### echo
+
+```sh
+#输出
+echo hello	
+echo -n hello	#不换行
+
+echo *	#输出当前目录下的内容, 类似 ls
+echo $(<xx.file)	#输出当前目录下文件 xx.file的内容,类似 cat
+```
+
+#### tr
+
+```sh
+#用于转换、压缩或删除字符。通常通过管道（pipe）接收标准输入，并将处理后的结果输出
+tr [选项] SET1 [SET2]
+-d (delete)：删除 SET1 中出现的所有字符。
+-s (squeeze)：压缩连续重复的字符，使其只保留一个。
+-c (complement)：取反，针对 SET1 以外的字符进行操作。
+-t (truncate)：将 SET1 截断为 SET2 的长度进行匹配。 
+echo "hello" | tr a-z A-Z			#转大写
+echo "abc123" | tr -d '0-9'			#删除所有数字，输出 abc
+echo "A   B" | tr -s ' '			#将多个空格变为一个，输出 A B
+echo "a1b2" | tr -cd '0-9'			#仅保留数字，输出 12
+echo "abcde" | tr -t 'abcde' '123'	#输出 123de
+```
+
+#### diff
+
+```sh
+#对比文件,查看不同
+diff file1 file2
+diff -u file1 file2		#友好格式查看
+time diff file1 file2 	#查看耗时
+```
+
 
 
 #### grep
 
 ```sh
-#文本查找
-grep -i	#忽略大小写
-grep -v	#反向，显示不匹配的
-grep  --color	#匹配内容显示颜色
-
-grep ‘hello‘ filename	#查找文件中有hello的行
-grep 'a\?b' filename	#匹配a出现0-1次后面跟b
-grep 'a.\{1,3\}b' filename	#匹配a后面任意字符1-3次后面跟着b
-grep '^a.*' filename	#匹配a开头的行
-grep '^$' filename 		#匹配空白行
+#文本查找 示例:
+grep 'hello' filename		#查找文件中有hello的行
 grep '\bhello\b' filename	#匹配完整hello单词
-grep '[abc]' filename 	#范围，匹配a或b或c出现的行
-grep '[a-c]' filename 	#同上
+grep 'a\?' filename			#匹配a出现0-1次
+grep '.\{1,3\}' filename	#匹配任意字符1-3次
+grep '[abc]' filename 		#范围，匹配a或b或c出现的行
+grep '[a-c]' filename 		#同上
+grep '^a' filename			#匹配a开头的行
+grep '^$' filename 			#匹配空白行
+grep '[[:space:]]' filename	#匹配空格的行
+
 grep '\(hello\)*' filename	#分组，hello出现任意次
 grep '\(hello\).*\1' filename	#分组，hello出现2次,\1表示前面的第一个分组hello
 grep '\(hello\)\|\(ab\)' filename	#匹配hello或ab出现的行	
-grep '[[:space:]]' filename	#匹配空格的行
+
+#参数
+-i	#忽略大小写
+-v	#反向，显示不匹配的
+-o	#仅显示匹配部分 
+-P	#启用正则 (功能符号不需要使用 \ 转义)
 
 #在目录下递归所有文件,查找某个字符串 不区分大小写
 grep -rni "字符串" 目录路径
 grep -rni "hello"	#当前目录及子目录递归查找所有文件,找出有"hello"的行
 
-#---------------
-#只显示匹配部分内容
-#-o	仅显示匹配部分
-#-P	启用正则
-grep -oP '.{0-1}hello.{0-50}' filename
-#--------------
+#-o	仅显示匹配部分 -P	启用正则
+grep -oP '.{0-1}hello.{0-50}' filename	#只显示匹配部分内容
 
 ```
 
@@ -375,19 +346,6 @@ df -Ph | awk '{pring $NF}'		#NF字段个数，$NF表示最后一个字段
 awk -F: '{print $1,$3}' /etc/passwd		#指定分隔符为冒号:
 ```
 
-
-
-
-
-#### locate
-
-```sh
-#文件查找：非实时，模糊查找，查找是根据全系统文件数据库进行
-#（linux系统会根据任务计划，每天定时收集文件信息存储到数据库。新系统该数据库不存在，可使用`updatedb`生成，生成慢）
-#速度快
-#不建议使用
-```
-
 #### find
 
 ```sh
@@ -419,7 +377,9 @@ find [查找路径] [查找标准] 查找后处理动作
 		p	#管道设备
 		s	#套接字设备
 	-size	#根据大小查找
+		c	#字节
 		k	# +8k 查找大于8K的文件，-8k 查找小于8k的文件
+			# 注意!:向上取整规则 +1k 即 >1 即文件>= 2k
 		M	# 
 		G	# 
 	-mindepth	#最小目录层级
@@ -454,6 +414,25 @@ find [查找路径] [查找标准] 查找后处理动作
 find -name 'test'	#当前目录查找test文件
 find -name 't*'
 find ./ -not \( -user test1 -o -user test2 \)	#查找不属于test1,也不属于test2的文件
+find . -readable -writable -type f	#可读,可写,文件类型
+find . 	-size +1024c -size -2048c ! -executable	#文件大小:1024~2048字节,不可执行
+```
+
+#### xxd
+
+```sh
+#十六进制查看与反向转换工具
+
+#将文件内容以“地址偏移量、十六进制原始码、ASCII 字符”三列显示
+xxd filename	
+xxd -l 64 filename	#只查看前64字节
+xxd -s 0x400 filename	#从 1KB 的位置开始看
+xxd -p filename		# 只看16进制内容,-p 代表 plain (纯净版)
+
+echo "hello" | xxd -p	#将字符串转16进制
+
+#将十六进制还原为二进制文件
+xxd -r hex_file.txt > bin_file.bin	# -r 代表 reverse (反向)
 ```
 
 #### dd
@@ -482,6 +461,9 @@ read 	#和用户交互，输入  #read的内容在当前进程空间,退出进�
 read -p "tips:"	x 	#输入时提示tips:输入内容保存到变量x
 echo $x		#输出变量
 
+read -t 3 x		#等待输入,3秒后超时
+read -d ":" x	#读取到':'停止,默认遇到换行停止
+
 #示例2
 read x y	#输入的内容以空格分开，保存到x和y变量
 
@@ -502,6 +484,13 @@ watch 'ls -l'		#查看当前目录情况，每隔2秒刷新
 #信号捕捉
 # 语法：trap 'command' sig
 trap 'echo hello' SIGINT	#捕捉SINGINT信号 ,注意：脚本里不能捕捉9和15信号
+```
+
+#### base64
+
+```sh
+base64 "字符串"	#编码
+base64 -d "编码串"	#解码
 ```
 
 #### hash

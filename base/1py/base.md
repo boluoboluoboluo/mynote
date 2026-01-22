@@ -350,23 +350,8 @@ s2 = s.title()	#首字母大写，其他小写
 s2 = s.lower()	#转小写
 s2 = s.upper()	#转大写
 
-#字符串编码解码
-b = s.encode(encoding="utf-8")		#此时打印b'xxx' ,要显示16进制,使用: b.hex()
-s = b.decode(encoding="utf-8")		#注意，decode方法需要待解码字符串为字节形式，否则报错
-#------------------
-#字符串转16进制
-h = bytes(s,"utf-8").hex()
-#16进制转字符串
-h = "756e6d696e696d697a65"
-b2 = bytes.fromhex(h)
-#-----------------
-#字符串转2进制字节形式:
 s = "hello"
-print(''.join(format(b, '08b') for b in s.encode()))
-#字符串转16进制\x形式:
-s = 'hello'
-print("".join(f"\\x{b:02x}" for b in s.encode()))
-#-----------------
+size = sys.getsizeof(s)	#查看占用内存大小(byte)	#字符串时对象,包含元数据,即使""也会占用几十个字节
 ```
 
 #### f,r,b,u含义
@@ -386,6 +371,7 @@ print(message)
 
 ```py
 #r
+#r的底层: 告诉编译器取消反斜杠 \ 的特殊转义功能。
 '''
 前缀 r 表示原始字符串（Raw String）：原始字符串中的转义字符不会被
 转义，而是按照字面意义来解释。常见用途是在正则表达式中使用，以
@@ -426,6 +412,75 @@ f 、 r 、 b 、 u 前缀可以组合使用，例如 fr"..." 表示既是
 '''
 ```
 
+#### 关于转义
+
+```py
+#在普通字符串 "" 或 '' 中，以下字符有特殊含义需使用 \ 转义：
+\			#反斜杠, "\\"
+' "			#单,双引号,如果字符串边界也是同类引号，内部需转义。如 'It\'s a desk'。
+\n \t \r	#换行与制表,不可见控制符。
+
+#正则(re模块)
+正则表达式中有大量字符具有语法意义，必须转义才能匹配其本身：
+. ^ $ * + ? ( ) [ ] { } | \
+#编写正则时强制使用 原始字符串 (Raw String)，即 r""。
+re.findall(r"\d+\.\d+", text)	#匹配数字+点+数字。
+re.findall("\\d+\\.\\d+", text)	#如果不加 r
+
+
+#Windows 路径：C:\Users\Name 中的 \U 会被误认为 Unicode 转义。
+解决：使用正斜杠 C:/Users/Name 或原始字符串 r"C:\Users\Name"。
+```
+
+#### 字节编码转换
+
+```py
+#字符串 和 2进制字节码 互相转换
+s = "hello"
+bdata = s.encode(encoding="utf-8")		# b'hello'
+bdata2 = bytes(s,encoding="utf-8")		# 同上
+
+bdata = b"hello"	#或其他字节数据
+s = bdata.decode(encoding="utf-8")		# hello
+```
+
+```py
+#2进制字节码 => 16进制编码串
+bdata = b"hello"
+hstr = bdata.hex()		# 68656c6c6f
+#16进制编码串 => 2进制字节码
+hstr = "68656c6c6f"
+bdata = bytes.fromhex(hstr)	# b"hello"
+```
+
+```py
+#2进制字节码 => "01010101"字符串 
+bdata = b"hello"
+# b 表示二进制，08 表示占 8 位，高位补 0
+bstr = "".join(f"{i:08b}" for i in bdata)	# 0110100001100101011011000110110001101111
+
+#"01010101"字符串  => 2进制字节码
+bstr = "0110100001100101011011000110110001101111"
+#每 8 位切分，并用 int(x, 2) 转为十进制整数
+blist = [int(bstr[i:i+8], 2) for i in range(0, len(bstr), 8)]
+bdata = bytes(blist)		# b"hello"
+```
+
+```py
+#16进制编码串 => 16进制\x形式字符串:
+hstr = "68656c6c6f"
+# 每两个字符提取出来，前面加上 \x
+hxstr = "".join(f"\\x{hstr[i:i+2]}" for i in range(0, len(hstr), 2))	# \x68\x65\x6c\x6c\x6f
+```
+
+```py
+#8进制串 转 ascii字符串
+#思路,逐个提取,先转10进制数,然后转字符,合并	(此方式也适合2进制,16进制)
+ostr = "o163 o157 o143 o153 o145 o164"		#示例
+s = "".join([chr(int(i[1:],8)) for i in ostr.split(" ")])
+print(s)
+```
+
 
 
 
@@ -445,7 +500,8 @@ print(s)
 #### base64
 
 ```py
-#base64编码，需导入base64
+#base64编码
+import base64
 def base64_ex():
 	s = "abc"
 	
@@ -465,7 +521,7 @@ import hashlib
     code = 'xxx'		#初始
 	hl = hashlib.md5()
 	hl.update(code.encode(encoding='utf-8'))
-	md5code = hl.hexdigest()		#md5加密后
+	md5code = hl.hexdigest()		#md5加密后		hl.digest()
 ```
 
 #### 正则

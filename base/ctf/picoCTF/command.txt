@@ -1,0 +1,27 @@
+
+进制转换:
+	printf  %x 100				#10 => 16
+	printf  %d 0xff			#16 => 10
+	printf  %o 0xff			#16 => 8
+
+	printf %x "'a"				#ascii => 16
+	printf "\\x65"				#16 => ascii
+
+	printf %d "'a"				#ascii => 10
+	printf \\x$(printf '%x' 65)	#10=>ascii
+	
+	echo -n  "hello" | xxd -p		#字符串=>16
+
+
+
+
+
+
+
+
+
+
+
+
+
+

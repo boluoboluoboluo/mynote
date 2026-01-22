@@ -1,28 +1,21 @@
 ### common
 
-示例：
-
 ```php
 <?php
-
 $a = 1;		//全局变量
 static $aa = "aa";
-
 function test(){
 	global $a;		//申明全局变量
 	global $aa;
 	echo "\n方法里访问全局变量a：".$a;
 	echo "\n方法里访问全局静态变量aa：".$aa;
 }
-
 class O extends X{
 	public $b = 2;
 	static $bb = "33";
-
 	function func(){
 		global $a;	//申明全局变量
 		echo "\n类的方法里访问全局变量a：".$a;
-
 		echo "\n类的方法里访问类的属性b：".$this->b;
 		echo "\n类的方法里访问类的静态属性bb:".self::$bb;
 	}
@@ -33,39 +26,28 @@ $o = new O();
 echo "\n访问类的属性b：".$o->b;
 echo "\n访问类的静态属性bb:".O::$bb;
 echo $o->func();
-
 ```
-
-
 
 ```php
 <?php
-
 	funciton start_ex(){
 		//段注释:/* */
-	
 		//查看版本：phpinfo();
-	
 		//命名空间:namespace
 		//引入类：use xx\A	//引入命名空间xx下的class A
 	}
-	
 	function common_ex(){
 		$i = 3;
 		$f = 3.0;
 		$s = "abc";
 		$arr = [1,2,3];
 		$arr2 = array(1,2,3);
-	
 		// #打印(整型，浮点，字符串，json，数组，集合等)
 		echo $str;
 		var_dump($str);
 		print_r($str);
-	
 		// #变量类型
-	
 		// #if语句
-	
 		// #switch语句
         switch($i){
             case 1:
@@ -76,34 +58,20 @@ echo $o->func();
             default:
                 $s = "3";
         }
-	
 		// #while语句
-	
 		// #循环 start
 		// #循环 end
-	
 		// #随机数
-	
 		// #暂停3秒
-	
 		// #输入函数，回车结束
-	
 		// #退出，默认0正常
-	
 		// #调用全局表量
-	
 		// #调用其他方法
-	
 		// #new对象
 		$classname = "testModel";		//命名空间下的类名
 		$c = new classname;
-	
 		// #调用对象方法，属性
-	
 	}
-
-
-
 	//include和reuqire说明
 	function include_require(){
 		//require和include几乎完全一样，除了处理失败的方式不同之外，require在出错时产生 E_COMPILE_ERROR 级别的错误。
@@ -166,8 +134,6 @@ $s = __NAMESPACE__;	//当前命名空间的名称（区分大小写）
     
 ```
 
-
-
 #### 变量
 
 ##### 超级全局变量
@@ -215,7 +181,6 @@ $_SESSION
 
 ```php
 <?php
-
 // 声明一个'iTemplate'接口
 interface iTemplate
 {
@@ -239,18 +204,14 @@ abstract class AbstractClass
         print $this->getValue() . PHP_EOL;
     }
 }
-
 //类
 class O extends X{
     private $c;
     protected $d;
-    
     const constant = '常量值';
-
     function showConstant() {
         echo  self::constant . PHP_EOL;
     }
-    
     function __construct( $par1, $par2 ) {
        $this->url = $par1;
        $this->title = $par2;
@@ -258,8 +219,7 @@ class O extends X{
 	function __destruct(){
        print "销毁 " . $this->name . "\n";
   	}
-}   
-	
+}
 ```
 
 ##### stdClass
@@ -280,10 +240,8 @@ echo $obj->age; // 输出 25
 
 ```php
 <?php
-	
 	function numerice_ex(){
 		$i = 3;
-	
 		// #是否为数字，整数，浮点数
     	$flag = is_numeric($i);	//判断是否为数字
 		$f = is_int($i);
@@ -322,7 +280,6 @@ echo $obj->age; // 输出 25
     	bcsub($a,$b,1);
     	bcmul($a,$b,1);
     	bcdiv($a,$b,1);
-	
 	}
 ```
 
@@ -333,17 +290,11 @@ echo $obj->age; // 输出 25
 	// #字符串方法
 	function str_ex(){
 		// s := "123"
-	
 		// #字符串太长续行
-	
 		// #字符串连接
-	
 		// #空和none
-	
 		// #字符串长度
-	
 		// #去除两端空格，去左lstrip，去右rstrip
-	
 		// #字符串转int，float（互转）
 		intval(s);
         floatval(s)
@@ -353,7 +304,6 @@ echo $obj->age; // 输出 25
     	if(strpos($str, $subStr) !== false){
             
         }
-	
 		// #字符串转数组
 	
 		// #根据字符分割成数组
@@ -367,13 +317,10 @@ echo $obj->age; // 输出 25
     	$x = ucwords($s);	//首字母大写
 	
 		// #获取编码类型
-	
 		// #编码
-	
 		// #解码
 	
 		// #编码转换（中文乱码）
-	
 		// #字符串编码解码
 	}
 
@@ -414,10 +361,7 @@ echo $obj->age; // 输出 25
 		$str2 = json_encode($arr2);		//输出 ["aa\/bb","ccdd"]
 		$arr3 = ["aa\bb","ccdd"];
 		$str3 = json_encode($arr3);		//输出 ["aa\\bb","ccdd"]
-	
 	}
-
-
 ```
 
 ##### 字符串和16进制互转
@@ -434,6 +378,16 @@ function hex_str(){
     return $re;
 }
 ```
+
+##### url编码
+
+```php
+$s = "hello   world";
+$ens = urlencode($s);
+$des = urldecode($ens);
+```
+
+
 
 ##### 判断身份证
 
@@ -544,7 +498,6 @@ function re_ex(){
 #作用：返回在预定义字符之前添加反斜杠的字符串。
 
 #预定义字符是：
-
     单引号（'）
     双引号（"）
     反斜杠（\）
@@ -555,26 +508,18 @@ function re_ex(){
 
 ```php
 <?php
-
 	function arr_ex(){
-	
 		$arr = ["a","b","c"];
-	
 		// #数组长度
 		count($arr);
-	
 		// #数组是否为空
 		empty();
-	
 		// #数组添加元素，删除元素，插入元素
 		array_push($arr,$i);
-	
 		// #数组是否包含某元素
 		in_array($i,$arr);
-	
 		// #数组合并
 		array_merge();
-	
 		// #数组转json
     	$json_str = json_encode(arr,JSON_UNESCAPED_UNICODE);
     	$arr = json_decode($json_str,true);
@@ -589,8 +534,6 @@ function re_ex(){
 		array_values($arr);
 		//#二维数组某列值取出组成一个新得数组：
 		$arr2 = array_column($arr1, 'age');	//将arr1的所有name列的值组成一个新的数组
-
-
 	}
 	
 	function unset_ex(){
@@ -616,55 +559,36 @@ krsort() - 根据关联数组的键，对数组进行降序排列
 
 ```php
 <?php
-
 	function common(){
-	
 		t := "2023-01=01"
-	
 		// #当前日期
-	
 		// #当前时间戳
-	
 		// #日期和时间戳互相转换
-	
 		// #日期和字符串互相转换，日期字符串格式（年月日时分秒）
-	
 		// #时间戳和字符串互相转换
-	
 		// #获取毫秒
-	
 		// #日期计算，n天后日期，n月后日期，n年后日期
-	
 		// #某日期为星期几
-	
 		//--------------------------------------------------
-	
 		//日期
 		$d = date("YmdHis");
 		//时间戳
 		$stmp = time();
-	
 		//日期转时间戳
 		$stmp = strtotime("1999-01-01");
-	
 		//时间戳转日期
 		$d = date("Ymd",$stmp);
-	
 		//明天的日期
 		$next_day = @date("Y-m-d",strtotime("+1 day"));
-	
 		//某个时间戳+3天
 		$stmp2 = strtotime("+3 day",$stmp);
-	
 	}
-	
 	//获取标准时间戳
 	function get_time(){
 		date_default_timezone_set('PRC');
 		$t = time();
 		return $t;
 	}
-	
 	//获取毫秒
 	function getMillisecond() {
 	    list($s1, $s2) = explode(' ', microtime());
@@ -763,40 +687,24 @@ fclose($file);
 
 ```php
 <?php
-
-
 	// #文件方法
 	function file_ex(){
 		$sfile = "s.txt";		//源文件
 		$dfile = "d.txt";		//目的文件
 	
 		// #判断目录是否存在，获取目录路径
-	
 		// #目录遍历
-	
 		// #目录创建，复制，移动，删除
-	
 		// #判断文件是否存在，获取文件路径，文件大小
-	
 		// #文件创建，复制，移动，删除
-	
 		// #打开文件 --只读，写入，追加，读写。编码方式
-	
 		// #读取文件 --字节，字符流，buf，读取，逐行读，全部读
-	
 		// #写入文件 --字节，字符流，buf，写入，写入行，写入全部
-	
 		// #换行符判断，文件末尾判断
-	
 		// #关闭文件，异常捕获，释放连接
-	
 		// #文件指针
-	
 		// #文件权限，设置文件权限
-	
 	}
-
-
 	//example:record log
 	function mlog($path,$msg){
 		date_default_timezone_set('PRC');
@@ -814,35 +722,22 @@ fclose($file);
 
 ```php
 <?php
-
 	function http_ex(){
 		// #获取http请求内容，url，域名，ip，请求头
-	
 		// #获取get参数
-	
 		// #获取post参数
 	}
-	
 	// http请求示例
 	function http_request_ex(){
 		$url = "http://www.baidu.com";
-	
 		// #get请求头
-	
 		// #请求参数
-	
 		// #发送请求
-	
 		// #解析响应
-	
 		// #释放连接
-
-
 		// #post请求
 	}
-	
 	//=====================================================
-	
 	function common(){
 		//常见http参数
 		//$_GET,$_POST,$_SERVER，$_SERVER['REQUEST_TIME']
@@ -869,7 +764,6 @@ fclose($file);
 		 
 		return $raw; 
 	}
-	
 	//获取ip
 	function get_ip(){
 		static $realip;
@@ -894,7 +788,6 @@ fclose($file);
 		
 		return trim($ip[0]);
 	}
-	
 	//session相关
 	function session_example(){ 
 		//$PHP 获取 sessionid 的方法为
@@ -902,14 +795,12 @@ fclose($file);
 		//可以获取指定 sessionid 中的内容
 		$s = session_id($sid);
 
-
 		//session共享关键代码：
 		session_destroy();
 		//var_dump($_SESSION);
 		session_id($_POST['sid']);
 		session_start();
 	}
-
 	//下载文件
 	function down_info($file){
 		$date = date("Ymd-H:i:m");
@@ -921,7 +812,6 @@ fclose($file);
 		echo file_get_contents($file);
 		readfile($file);
 	}
-	
 	//get方式获取数据
 	private function get_it($url){
 		$ch = curl_init();
@@ -953,7 +843,6 @@ fclose($file);
 			);
 			curl_setopt($curl, CURLOPT_HTTPHEADER, $header);
 		}
-	
 	 	$result = curl_exec($curl);
 		if (curl_errno($curl)) {
 			return 'Errno'.curl_error($curl);
@@ -963,20 +852,16 @@ fclose($file);
 	}
 ```
 
-
-
 ### 异常
 
 ```php
 <?php 
-
     function checkNum($number){
  		if($number>1){
 			throw new Exception("Value must be 1 or below");
  		}
  		return true;
 	}
-
 	try{
  		checkNum(2);
  		//If the exception is thrown, this text will not be shown
@@ -984,12 +869,9 @@ fclose($file);
  	}catch(Exception $e){	//catch exception
  		echo 'Message: ' .$e->getMessage();
  	}
-
 ```
 
-
-
-### error_log
+### error_og
 
 ```php
 public function log_test(){
@@ -997,5 +879,16 @@ public function log_test(){
     $message = "a test log...";
     error_log($message,3,$path);	//3为记录到文件 -- 0默认，记录到服务器配置的日志系统，
 }
+```
+
+### 其他
+
+```php
+//执行系统命令
+// 方式 A
+$output = shell_exec('ls -l');
+// 方式 B (效果等同于 shell_exec)
+$output = `ls -l`;
+echo "<pre>$output</pre>";
 ```
 

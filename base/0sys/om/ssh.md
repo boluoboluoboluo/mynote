@@ -10,12 +10,12 @@ systemctl start ssh.service
 sudo apt install openssh-server
 
 #连接命令	#ssh默认端口22
-ssh username@host -p port
+ssh -p port username@host 	#指定端口
 ssh admin@192.168.0.1	#示例
 
-#指定端口
-ssh -p port user@host
+ssh -i ./id_rsa username@host	#私钥登录 -i [私钥路径]	!!注意私钥权限(600)
 
+ssh username@host 'COMMAND'		#远程主机执行命令（不登录）
 
 #强制使用口令认证
 ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no user@host
@@ -24,45 +24,32 @@ ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no user@host
 **密钥认证相关:** 
 
 ```shell
-#步骤一：主机认证
-#步骤二：用户认证
-	#方式一：基于口令认证
-	#方式二基于密钥认证
+#基于密钥认证
 
 #linux：openssh软件
-#C/S架构
-	服务端：sshd，配置文件/etc/ssh/sshd_config
-	
-    客户端：ssh,配置文件/etc/ssh/ssh_config
-    	#一些命令：
-    	ssh USERNAME@HOST [-p port]		#登录
-    	ssh -l USERNAME HOST			#同上
-    	ssh USERNAME@HOST 'COMMAND'		#远程主机执行命令（不登录）
-    	
-    	ssh-keygen		#密钥生成器（基于密钥认证）
-    		-t			#指定加密方式，一般为rsa
-    		-f			#指定存放路径，可省，默认~/.ssh/id_rsa
-    		#用法：
-    		ssh-keygen -t rsa -f ~/.ssh/id_rsa		#生成密钥，（一路回车即可）
-    										#私钥保存在~/.ssh/id_rsa，（若没有.ssh则创建，权限700）
-    										#公钥保存在~/.ssh/id_rsa.pub
-    										#公钥需要追加保存到远程主机对应用户家目录下.ssh/authorized_keys文件中（或authorized_keys2文件）
-    	
-    	ssh-copy-id		#将公钥传输至远程服务器对应家目录的.ssh对应文件（自动快捷实现）
-    		#用法
-    		ssh-copy-id -i ~/.ssh/id_rsa.pub kk@192.168.1.100	#-i参数为指定本地公钥文件
-    	
-    	scp				#跨主机安全复制工具（复制数据）
-    		#语法：
-    		scp SRC DEST	
-    			-r #参数，递归复制目录数据
-    			-a	#复制文件及其存档属性数据(权限等)
-    		#示例：
-    		scp /temp/testfile kk@192.168.1.100:/temp	#本地数据复制到远程temp目录
-    		scp kk@192.168.1.100:/temp/testfile /temp 	#远程数据复制到本地temp目录
-    	
-    	exit			#退出登录会话
+服务端：sshd，配置文件/etc/ssh/sshd_config
+客户端：ssh,配置文件/etc/ssh/ssh_config
 
+ssh-keygen		#密钥生成器（基于密钥认证）
+	-t			#指定加密方式，一般为rsa
+	-f			#指定存放路径，可省，默认~/.ssh/id_rsa
+
+ssh-keygen -t rsa -f ~/.ssh/id_rsa		#生成密钥，（一路回车即可）
+#私钥保存在~/.ssh/id_rsa，（若没有.ssh则创建，权限700）
+#公钥保存在~/.ssh/id_rsa.pub
+#公钥需要追加保存到远程主机对应用户家目录下.ssh/authorized_keys文件中（或authorized_keys2文件）
+    	
+ssh-copy-id		#将公钥传输至远程服务器对应家目录的.ssh对应文件（自动快捷实现）
+ssh-copy-id -i ~/.ssh/id_rsa.pub kk@192.168.1.100	#示例 -i参数为指定本地公钥文件
+
+#===========================
+scp		#跨主机安全复制工具（复制数据）
+scp SRC DEST	
+-r #参数，递归复制目录数据
+-a	#复制文件及其存档属性数据(权限等)
+#示例：
+scp /temp/testfile kk@192.168.1.100:/temp	#本地数据复制到远程temp目录
+scp kk@192.168.1.100:/temp/testfile /temp 	#远程数据复制到本地temp目录
 ```
 
 `.ssh/config` 内容示例:

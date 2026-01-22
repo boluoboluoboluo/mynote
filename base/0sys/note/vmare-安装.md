@@ -2,9 +2,9 @@
 
 vmnet0：桥接模式
 
-vmnet1：Nat模式
+vmnet1：仅主机模式
 
-vmnet8：仅主机模式
+vmnet8：Nat模式
 
 
 
