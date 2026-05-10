@@ -36,7 +36,7 @@ ffmpeg -i "concat:video1.ts|video2.ts|video3.ts" -c copy output.mp4		#注意是t
 
 **方式二:**
 
-示例视频`1.mp4`,`2.mp4`,`3.mp4`
+示例视频`1.mp4`,`2.mp4`,`3.mp4` 	(或合并多个音频)
 
 ```sh
 # 命令
@@ -197,6 +197,34 @@ ffmpeg -i input.mp4 -vn -acodec aac -b:a 128k output.m4a
 
 #### 问题记录
 
+##### 视频片段合并内容异常
+
+```sh
+#不重新编码,截取视频:
+#说明:
+# 1.ffmpeg -i s.mp4 -ss ...  	#命令会使得截取后的视频开头没有关键帧
+# 2.ffmpeg -ss xxx -i s.mp4 ...	#命令会从开始时间前最近的关键帧开始截取,此时视频片段单独播放无问题,如果和其他片段合并,则会导致截取时间点前面的内容出现(关键帧到截取时间点之间的内容)
+# 3.ffmpeg 截取的视频结尾位置都是直接截断,所以截取后的视频片段结尾没有关键帧
+
+# 保证视频片段开头有关键帧,合并后才几乎不会出现问题
+```
+
+
+
+```sh
+#问题描述:视频截取的片段,单独播放没问题,但是合并后内容异常,出现多余的内容
+#分析:截取时是通过原视频关键帧截取,单独播放时会跳过关键帧,根据时间戳播放,合并时根据关键帧合并,导致播放异常
+#解决方法:截取时,不要使用 -c copy ,应该对视频重新编码
+#截取片段 A：
+ffmpeg -ss [开始] -t [时长] -i in.mp4 -c:v libx264 -crf 18 -c:a aac out1.mp4
+#截取片段 B：
+ffmpeg -ss [开始] -t [时长] -i in.mp4 -c:v libx264 -crf 18 -c:a aac out2.mp4
+
+#最后使用 concat 协议合并这两个干净的 out1.mp4 和 out2.mp4。
+```
+
+
+
 ##### 合并视频卡顿
 
 ```sh
@@ -219,6 +247,7 @@ ffmpeg -i 1.mp4 -c copy 1.ts		#表示都不重新编码
 #描述: 如果当前想要截取的位置不是关键帧,会导致多截或少截的问题
 #此时应该插入关键帧,方法如下:
 #假如想要在视频第5秒位置截取,但第5秒不是关键帧,先插入关键帧:
+	#分析:先查看第5秒位置往后的第一个关键帧,假如在15秒位置处:
 	#说明:截取前15秒的视频,重新编码,并在5秒的位置插入一个关键帧
 	ffmpeg -ss 00:00:00 -i input.mp4  -t 15 -c:v libx264 -force_key_frames 5 -c:a copy part1.mp4
 	#剩下部分视频直接截取:
@@ -230,6 +259,23 @@ ffmpeg -i 1.mp4 -c copy 1.ts		#表示都不重新编码
 	ffmpeg -i "concat:part1.ts|part2.ts" -c copy output.mp4
 	#最后对有关键帧的视频进行截取
 	ffmpeg -ss 00:00:05 -i output.mp4  -c:v copy -c:a copy output2.mp4		#现在可以在第5秒截取了
+
+============
+#优化:
+	#如果不需要精确控制截取位置,则不需要插入关键帧,因为重新编码方式会自动对截取的视频开头和结尾添加关键帧
+	#所以,上面的情况,只要先截取5~15位置即可(重新编码方式)
+	ffmpeg -ss 00:00:05 -i input.mp4  -t 10 -c:v libx264  -c:a copy part1.mp4
+	#其他步骤一致
+	
+#补充:
+	#查看某位置往后第一个关键帧: 
+	#示例:00:01:00 往后60秒内的关键帧
+	ffprobe -read_intervals 00:01:00%+60 -select_streams v -show_frames -show_entries frame=best_effort_timestamp_time,pict_type -v quiet -of csv="p=0" input.mp4 | findstr "I"
+
+#补充2:
+	#假如视频的56.5 , 60.3位置处有关键帧:
+	#从60秒截取的话,则会从上一个关键帧(56.5)截取,需留意
+
 ```
 
 ##### 部分截取到ts容器问题
@@ -266,5 +312,20 @@ ffmpeg -ss starttime -i input.mp4 -t timestamp -c copy output.mp4
 #说明:输入的音频有6声道
 #解决:推荐将音频转换为立体声音,使用 -ac 2 参数
 ffmpeg -i a.mp4 -c:v libx265 -b:v 2M -vf "scale=1280:-2" -c:a aac -b:a 64k -ac 2 out.mp4	#示例
+```
+
+##### 截取后的视频封面不一致
+
+```sh
+#由于你之前的剪辑在“关键帧”处切割，导致视频封面呈现旧画面
+
+#解决方法1:重新编码
+ffmpeg -ss 00:00:05 -i input.mp4 -to 00:00:15 -c:v libx264 -c:a aac output.mp4
+
+#解决方法2:手动指定一张图作为封面（MP4 专用）
+  #提取你想要的画面作为封面
+  ffmpeg -i output.mp4 -ss 00:00:01 -vframes 1 cover.jpg	
+  #将图片合并进视频（作为封面流）
+  ffmpeg -i output.mp4 -i cover.jpg -map 0 -map 1 -c copy -disposition:v:1 attached_pic final.mp4
 ```
 

@@ -101,11 +101,15 @@ curl --data-urlencode 'comment=hello world' https://google.com/login	#采用post
 
 curl -e 'https://google.com?q=example' https://www.example.com	#设置refer
 curl -H 'Referer: https://google.com?q=example' https://www.example.com	#同上
-
-#-F参数用来向服务器上传二进制文件。
-curl -F 'file=@photo.png' https://google.com/profile	#命令会给 HTTP 请求加上标头Content-Type: multipart/form-data，然后将文件photo.png作为file字段上传。
-curl -F 'file=@photo.png;type=image/png' https://google.com/profile	#指定 MIME 类型为image/png，否则 curl 会把 MIME 类型设为application/octet-stream。
-
+----------------------------
+#-F参数用来向服务器上传二进制文件。@表示文件发送, file_name 根据服务器接收的那么指定
+#命令会给 HTTP 请求加上标头Content-Type: multipart/form-data，然后将文件photo.png作为file字段上传。
+curl -F 'file_name=@photo.png' https://google.com/profile	
+#指定 MIME 类型为image/png，否则 curl 会把 MIME 类型设为application/octet-stream。
+curl -F 'file=@photo.png;type=image/png' https://google.com/profile	
+#上传内容除了文件,还有其他参数时:
+curl -F 'file=@photo.png;type=image/png' -F "user_id=123" https://google.com/profile
+----------------------------
 curl -G -d 'q=kitties' -d 'count=20' https://google.com/search	# -G :指定get请求
 curl -u 'bob:12345' https://google.com/login	#u参数用来设置服务器认证的用户名和密码。
 

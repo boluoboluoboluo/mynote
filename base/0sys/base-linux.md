@@ -1015,7 +1015,8 @@ dig www.example.com	#查询域名 IP（详细）
 ANY	#查询所有类型
 	dig @8.8.8.8 ANY example.com
 
-host 域名	#查询域名对应ip
+host 域名	   #查询域名对应ip
+host ip		#查询IP对应的域名
 
 #指定本机解析
 /etc/hosts
@@ -1034,6 +1035,7 @@ systemctl status networking
 
 ```sh
 #ss （推荐取代 netstat）显示网络连接、端口和套接字，用于查看活跃链接和任务
+#直接从内核获取套接字统计信息，速度远快于 netstat。
 ss -tunlp	#查看端口开放
 -t 	表示列出TCP协议的信息
 -u	表示列出UDP协议的信息
@@ -1041,11 +1043,12 @@ ss -tunlp	#查看端口开放
 -l	表示只列出监听状态的网络连接
 -p 	表示列出占用该端口的进程信息
 
-netstat	-antp	#查看网络连接信息
+netstat	-antp	#查看网络连接信息 读取 /proc/net/ 下的文件获取端口信息
 --------------------
-sudo lsof -i		#查看所有网络连接列表
+sudo lsof -i		#查看所有网络连接列表, 将端口视为文件显示具体进程 ID (PID) 与端口的映射关系
 sudo lsof -i :80	#查看单个 80 端口进程
 sudo lsof -i TCP	#查看 TCP 连接
+sudo lsof -p pid	#查看进程打开的库
 
 ```
 
@@ -1211,6 +1214,29 @@ dmesg -H	#内核缓冲日志,-H 人类可读
 ### 备份还原
 
 ```sh
-rsync
+tar		#备份系统
+
+#备份指令:
+sudo tar -cvpzf /mnt/your_usb/system_backup.tar.gz \
+--exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run \
+--exclude=/tmp --exclude=/mnt --exclude=/media --exclude=/lost+found \
+--exclude=/var/cache/apt/archives \
+/
+
+#还原:
+1.安装盘开机
+2.格式化分区
+3.解压备份文件
+4.重装引导
+=================================
+
+rsync	#备份数据 (日常备份,增量同步)
+
+rsync -avz --delete /home/user/my_project/ /mnt/backup/my_project/
+ -a (archive)：归档模式，保留权限和所有属性。
+ -v (verbose)：显示备份进度。
+ -z (compress)：传输时压缩，节省空间。
+ --delete：非常重要。如果源文件夹删了某个文件，备份目标也跟着删（保证两边完全一致）
+ #注意斜杠：/my_project/（带斜杠）表示同步目录下的内容；如果不带斜杠，会把整个目录搬过去
 ```
 

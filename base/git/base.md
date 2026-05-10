@@ -136,6 +136,9 @@ git branch -d <branchname>	#删除本地分支
 
 git branch -M main		#分支重命名为 main
 
+#查看本地和远程建立关联的分支
+git branch -vv
+--------------------------
 git checkout <branchname>	#切换分支
 
 git checkout -b dev origin/dev	#创建分支dev,并关联远程的dev分支	
@@ -265,6 +268,17 @@ git add .
 ```
 
 
+
+### git稀疏检出
+
+```sh
+# 适用于git仓库很大,只需要其中某个子目录内容时
+git clone --filter=blob:none --no-checkout <仓库URL>
+cd <仓库名>
+git sparse-checkout set <目录路径>
+git checkout
+
+```
 
 
 

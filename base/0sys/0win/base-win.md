@@ -137,6 +137,12 @@ cmd: taskkill /im notepad.ext /T /F
 	/T 		#以树形结束 
 	/F 		#强制结束
 ---------------
+
+#通过进程id查程序路径
+wmic process where processid=1234 get executablepath
+#通过进程id查详细信息
+wmic process where processid=1234 list full
+
 ```
 
 ### 用户
@@ -325,8 +331,8 @@ route add 255.255.255.255 mask 255.255.255.255 192.168.1.100 -p
 
 ```sh
 #查询公网ip
-nslookup myip.opendns.com resolver1.opendns.com
-curl ifconfig.me	#同上
+curl ifconfig.me	
+curl ip.sb			#同上
 ```
 
 ```sh

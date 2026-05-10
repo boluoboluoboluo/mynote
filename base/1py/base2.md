@@ -52,6 +52,13 @@ except Exception as e:
     print(e)
 finally:
     pass
+
+#优雅的报错代码,一行显示:
+	except Exception as e:
+		# 获取异常发生的行号
+		exc_type, exc_obj, exc_tb = sys.exc_info()
+		# 优雅的一行流输出
+		print(f"下载报错 | 行号: {exc_tb.tb_lineno} | 类型: {type(e).__name__} | 内容: {e}")
 ```
 
 

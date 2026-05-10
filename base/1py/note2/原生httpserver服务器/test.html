@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>接口调试控制台</title>
+    <style>
+        body { font-family: "Microsoft YaHei", sans-serif; padding: 20px; line-height: 1.6; color: #333; }
+        .card { border: 1px solid #ddd; padding: 15px; margin-bottom: 15px; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        h3 { margin-top: 0; color: #007bff; }
+        button { cursor: pointer; padding: 6px 16px; background: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        input[type="text"], input[type="file"] { padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+        pre { background: #272822; color: #f8f8f2; padding: 15px; border-radius: 5px; overflow-x: auto; min-height: 100px; }
+        .hint { font-size: 0.9em; color: #666; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Python 后端接口调试面板</h1>
+    <p class="hint">当前页面由服务器 <code>/test</code> 路径分发，已自动绕过跨域限制。</p>
+
+    <!-- 1. GET 请求：对应 handle_info -->
+    <div class="card">
+        <h3>1. GET 详情获取 (含参数捕获)</h3>
+        <button onclick="testGetInfo()">测试 GET /info</button>
+    </div>
+
+    <!-- 2. POST 请求：对应 handle_post_params -->
+    <div class="card">
+        <h3>2. POST JSON 数据 (含请求体捕获)</h3>
+        <button onclick="testPostData()">测试 POST /post-data</button>
+    </div>
+
+    <!-- 3. 文件上传：对应 handle_upload -->
+    <div class="card">
+        <h3>3. 文件上传 (MIME 解析)</h3>
+        <input type="file" id="fileInput">
+        <button onclick="testUpload()">执行上传</button>
+    </div>
+
+    <!-- 4. 文件下载：对应 handle_download -->
+    <div class="card">
+        <h3>4. 文件下载 (octet-stream)</h3>
+        <input type="text" id="downloadName" placeholder="输入文件名 (如 test.txt)">
+        <button onclick="testDownload()">执行下载</button>
+    </div>
+
+    <hr>
+    <h4>实时调试输出:</h4>
+    <pre id="output">等待操作...</pre>
+
+    <script>
+        const output = document.getElementById('output');
+        
+        // 打印结果到页面
+        const log = (data) => {
+            output.innerText = typeof data === 'object' ? JSON.stringify(data, null, 4) : data;
+            console.log(data);
+        };
+
+        // --- 1. 测试 GET 获取详情 ---
+        async function testGetInfo() {
+            try {
+                const res = await fetch('/info?id=888&user=admin&debug=true');
+                const data = await res.json();
+                log(data);
+            } catch (e) { log("请求出错: " + e); }
+        }
+
+        // --- 2. 测试 POST 发送 JSON ---
+        async function testPostData() {
+            try {
+                const res = await fetch('/post-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        token: "abc-123",
+                        command: "RESTART_SERVICE",
+                        params: { timeout: 30 }
+                    })
+                });
+                log(await res.json());
+            } catch (e) { log("请求出错: " + e); }
+        }
+
+        // --- 3. 测试文件上传 ---
+        async function testUpload() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length === 0) return alert("请先选择文件");
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            try {
+                const res = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData // 注意：不需要手动设置 Content-Type
+                });
+                log(await res.json());
+            } catch (e) { log("上传出错: " + e); }
+        }
+
+        // --- 4. 测试文件下载 ---
+        async function testDownload() {
+            const fileName = document.getElementById('downloadName').value;
+            if (!fileName) return alert("请输入要下载的文件名");
+
+            try {
+                const res = await fetch(`/download?name=${encodeURIComponent(fileName)}`);
+                if (!res.ok) {
+                    const err = await res.text();
+                    throw new Error(err || "文件不存在");
+                }
+                
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                log(`文件 [${fileName}] 下载请求已发出`);
+            } catch (e) { log("下载出错: " + e.message); }
+        }
+    </script>
+</body>
+</html>

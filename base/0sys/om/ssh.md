@@ -12,6 +12,7 @@ sudo apt install openssh-server
 #连接命令	#ssh默认端口22
 ssh -p port username@host 	#指定端口
 ssh admin@192.168.0.1	#示例
+ssh admin@xx.xxx.com	#示例
 
 ssh -i ./id_rsa username@host	#私钥登录 -i [私钥路径]	!!注意私钥权限(600)
 

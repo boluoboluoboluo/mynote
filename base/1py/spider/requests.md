@@ -28,6 +28,34 @@ except:
     print("异常")
 ```
 
+```py
+#如果请求多的话,不加session每次会新建tcp连接,频繁请求会导致服务器限制,封禁
+#加session访问 (复用tcp连接)
+headers={
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ... Chrome/130...",
+    "Referer": url,           # 有时有用
+}
+session = requests.Session()
+session.headers.update(headers)
+session.get(url)
+
+session.close()
+```
+
+```py
+import requests
+#上传文件
+url = "http://example.com/upload"
+files = {
+    # 格式：'字段名': ('文件名', 文件对象, 'MIME类型')
+    'file': ('a.php', open('a.php', 'rb'), 'image/jpeg') 
+}
+r = requests.post(url, files=files)
+print(r.text)
+```
+
+
+
 ##### 请求方式
 
 ```
@@ -107,6 +135,28 @@ requests.URLRequired		#url缺失异常
 requests.TooManyRedirects	#超过最大重定向次数，重定向异常
 requests.ConnectTimeout		#连接超时异常
 requests.Timeout			#请求超时异常
+```
+
+##### 下载
+
+```py
+response = requests.get(url, timeout=10)
+# 检查请求是否成功（状态码 200）
+response.raise_for_status() 
+# 使用 'wb' 模式写入二进制数据
+with open("my_image.jpg", "wb") as f:
+    f.write(response.content)
+print("下载完成！")
+
+#下载大文件,使用流式传输:  stream=True
+with requests.get(url, stream=True, timeout=30) as r:
+    r.raise_for_status()
+    with open("big_file.zip", "wb") as f:
+        # 每次读取 8KB 数据并写入磁盘
+        for chunk in r.iter_content(chunk_size=8192):
+            if chunk: # 过滤掉保持连接的 chunk
+                f.write(chunk)
+print("大文件下载成功！")
 ```
 
 

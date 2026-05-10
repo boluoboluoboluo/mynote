@@ -1,4 +1,4 @@
-### beautifulsoup
+#### common
 
 > 2024-03
 
@@ -104,5 +104,21 @@ print(r.attrs["href"])	#href的值
 #正则查找
 #查找image标签的src属性值包含字符串"v3-web.douyinvod.com"
 r = soup.findAll(name="image", attrs={"src" :re.compile(r"v3-web.douyinvod.com")})
+```
+
+#### note
+
+```py
+#遍历子标签时,使用 Tag 判断
+from bs4 import Tag,NavigableString
+if isinstance(node,Tag):
+
+=======================
+#获取标签内容时,string方法局限:
+.string: 注意，仅当节点只包含一个文本节点（且没有其他子标签）时，.string 才会返回该文本。如果节点包含子标签，.string 通常返回 None
+
+#使用下面方法,获取标签文本内容,而不会获取子标签内容
+s = "".join(node.find_all(string=True,recursive=False))
+
 ```
 

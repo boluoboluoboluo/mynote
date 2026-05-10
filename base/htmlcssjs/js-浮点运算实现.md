@@ -2,77 +2,46 @@
 
 ```js
 <script>
-		//*********************  js浮点运算实现 START******************************/
-		// 补0
-		function padding0 (p) {
-			var z = ''
-			while (p--) {
-				z += '0'
-			}
-			return z
-		}
-		/**
-		 * 解决小数精度问题
-		 * @param {*数字} a
-		 * @param {*数字} b
-		 * @param {*符号} sign
-		 * fixedFloat(0.3, 0.2, '-')
-		 */
-		function fixedFloat (a, b, sign) {
-			function handle (x) {
-				var y = String(x)
-				var p = y.lastIndexOf('.')
-				if (p === -1) {
-					return [y, 0]
-				} else {
-					return [y.replace('.', ''), y.length - p - 1]
-				}
-			}
-			// v 操作数1, w 操作数2, s 操作符, t 精度
-			function operate (v, w, s, t) {
-				switch (s) {
-					case '+': return (v + w) / t
-					case '-': return (v - w) / t
-					case '*': return (v * w) / (t * t)
-					case '/': return (v / w)
-				}
-			}
+//获取小数位数
+function getPrecision(num) {
+  const str = num.toString();
+  if (str.indexOf('.') === -1) return 0;
+  return str.split(".")[1].length;
+}
 
-			var c = handle(a)
-			var d = handle(b)
-			var k = 0
-	
-			if (c[1] === 0 && d[1] === 0) {
-				return operate(+c[0], +d[0], sign, 1)
-			} else {
-				k = Math.pow(10, Math.max(c[1], d[1]))
-				if (c[1] !== d[1]) {
-					if (c[1] > d[1]) {
-						d[0] += padding0(c[1] - d[1])
-					} else {
-						c[0] += padding0(d[1] - c[1])
-					}
-				}
-				return operate(+c[0], +d[0], sign, k)
-			}
-		}
-		// 加
-		function plus (a, b) {
-		  return fixedFloat(a, b, '+')
-		}
-		// 减
-		function minus (a, b) {
-		  return fixedFloat(a, b, '-')
-		}
-		// 乘
-		function multiply (a, b) {
-		  return fixedFloat(a, b, '*')
-		}
-		// 除
-		function division (a, b) {
-		  return fixedFloat(a, b, '/')
-		}
-		//*********************  js浮点运算实现 END ******************************/
+function add(a, b) {
+  const p1 = getPrecision(a);
+  const p2 = getPrecision(b);
+  const m = Math.pow(10, Math.max(p1, p2));
+  return (a * m + b * m) / m;
+}
+
+function sub(a, b) {
+  const p1 = getPrecision(a);
+  const p2 = getPrecision(b);
+  const m = Math.pow(10, Math.max(p1, p2));
+  return (a * m - b * m) / m;
+}
+function mul(a, b) {
+  const s1 = a.toString(), s2 = b.toString();
+  let m = 0;
+  try { m += s1.split(".")[1].length; } catch (e) {}
+  try { m += s2.split(".")[1].length; } catch (e) {}
+  return Number(s1.replace(".", "")) * Number(s2.replace(".", "")) / Math.pow(10, m);
+}
+function div(a, b) {
+  const p1 = getPrecision(a);
+  const p2 = getPrecision(b);
+  const r1 = Number(a.toString().replace(".", ""));
+  const r2 = Number(b.toString().replace(".", ""));
+  return (r1 / r2) * Math.pow(10, p2 - p1);
+}
+function mod(a, b) {
+  const p1 = getPrecision(a);
+  const p2 = getPrecision(b);
+  const m = Math.pow(10, Math.max(p1, p2));
+  return ((a * m) % (b * m)) / m;
+}
 </script>
 ```
 

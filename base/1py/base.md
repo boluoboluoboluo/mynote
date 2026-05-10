@@ -31,7 +31,9 @@ print(sys.argv)	#执行py test.py a b c 输出：['test.py','a','b','c']
 
 #执行系统命令
 os.system("mkdir today")	#不安全,弃用
-subprocess(["mkdir","param1","param2"],shell=True)		# import subprocess
+subprocess.run(["mkdir","param1","param2"],shell=True)		# import subprocess
+#示例:
+subprocess.run(["dir", "/a"])  # 运行Windows内置命令时,需加 shell=True
 
 #删除变量，释放资源
 #不会删除变量引用的对象
@@ -291,12 +293,22 @@ c = chr(i)	#转字符
 
 s = "123"
 
-#字符串太长续行
-s2 = "本句太长" \
+#字符串太长续行,print(s) 会输出很长的字符串
+s = (
+    "本句太长" 
     "需要须行"
+)
+#保留文本内容格式,包括换行
+s = '''
+1111111111
+222222222
+33333333333
+'''
 
 #字符串连接
-s = "abc" + "bcd"
+s = "abc" + "bcd"		#方式1
+s2 = f"{s}wefw"			#方式2
+s3 = "".join([s,s2])	#方式3,性能最好
 
 #空和none
 s = None
@@ -306,8 +318,8 @@ if s is None:	#判断none
 #字符串长度
 i = len(s)
 
-#去除两端空格，去左lstrip，去右rstrip
-s2 = s.strip(" ")	
+#strip() 				#可以同时去掉字符串左右两端的空格、制表符（\t）和换行符（\n）
+s2 = s.strip(" ")		#去除两端空格，去左lstrip，去右rstrip
 
 #字符串转int，float（互转）
 s = str(22)
@@ -326,6 +338,11 @@ if "abc" in s:
 if s.find("abc") != -1:
     print("exists..")
 
+#判断开始
+if s.startswith("#"):
+    print("has # ..")
+    
+    
 #替换指定字符
 s = "123"
 s2 = s.replace("3","4")		#结果：124
@@ -353,6 +370,40 @@ s2 = s.upper()	#转大写
 s = "hello"
 size = sys.getsizeof(s)	#查看占用内存大小(byte)	#字符串时对象,包含元数据,即使""也会占用几十个字节
 ```
+
+#### 随机串
+
+```py
+import random
+import string
+
+# 生成 6 位短信验证码格式
+code = ''.join(random.choices(string.digits, k=6))
+print(code) # 示例: '823901'
+#=====================
+# 字母 + 数字
+chars = string.ascii_letters + string.digits 
+# 生成 16 位随机串
+random_str = ''.join(random.choices(chars, k=16))
+print(random_str) 
+# 示例输出: '7kL9p2mWqZ1xVb8N'
+#=====================
+# 10位时间戳 + 4位随机字母
+filename = str(int(time.time())) + "".join(random.choices(string.ascii_letters, k=4))
+#=====================
+#如果你需要生成的字符串绝对不重复（比如文件名或数据库主键）
+import uuid
+# 生成一个随机的 UUID
+unique_id = str(uuid.uuid4())
+print(unique_id)
+# 输出格式: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+#=====================
+
+```
+
+
+
+
 
 #### f,r,b,u含义
 
@@ -481,7 +532,21 @@ s = "".join([chr(int(i[1:],8)) for i in ostr.split(" ")])
 print(s)
 ```
 
+#### unicode编码转换
 
+```py
+#Unicode（万国码）是一本“世界字典”，它给地球上每一种语言的每一个字符都分配了一个唯一的编号（称为码点，Code Point）
+
+#中文转unicode编码
+s = "你好"
+us = s.encode("unicode_escape").decode("utf-8")
+print(us)
+
+#unicode编码转中文
+us = r'\u6d4b\u8bd5\u65b0\u95fb1'
+zs = us.encode("utf-8").decode("unicode_escape")
+print(zs)
+```
 
 
 
@@ -740,7 +805,7 @@ def arr_ex():
 	#数组添加元素，删除元素，插入元素
 	#arr.append(obj)			#追加元素
 	#arr.remove(obj)			#删除元素
-	#arr.insert(index,obj)		#插入元素
+	#arr.insert(index,obj)		#插入元素, index=0 表示插入最前面
 	#arr.pop()					#删除最后一个元素
 	#arr.clear()				#清空
 	

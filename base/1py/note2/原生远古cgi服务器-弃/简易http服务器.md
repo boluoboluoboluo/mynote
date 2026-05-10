@@ -10,9 +10,13 @@ python -m http.server
 
 ### 动态模式
 
+<font color=red>--cgi 模式：动态逻辑写在**外部脚本文件**里。服务器每收到一个请求，就去硬盘找脚本，**新开一个 Python 进程**去跑那个脚本。</font> 
+
+<font color=red>性能差,且安全性不好</font> 
+
 ```sh
 #动态脚本方式:
-python -m http.server --cgi
+python -m http.server --cgi 8000
 #需在测试目录下创建 cgi-bin 目录
 #里面存放脚本,例如hello.py:		# 需包含 HTTP 头部和内容：
 	#!/usr/bin/env python3
@@ -151,7 +155,7 @@ file_name = "1.mp4"
 
 # 设置下载头
 print("Content-Type: application/octet-stream")
-print(f"Content-Disposition: attachment; filename=\"{filename}\"")
+print(f"Content-Disposition: attachment; filename=\"{file_name}\"")
 # print("Cache-Control: no-store")
 # print("Pragma: no-cache")
 print()  # 结束头部

@@ -1,4 +1,4 @@
-#### 示例
+#### common
 
 ```html
 <!DOCTYPE html>
@@ -11,20 +11,34 @@
 </html>
 ```
 
-#### hr样式
-
-```html
-<!--通过border属性控制分隔线粗细颜色-->
-<hr style="border:1px solid red">
-```
-
-#### textarea取值
-
 ```js
-//textarea 不能通过name属性获取值
-//jq通过class属性获取
-$(".textarea").val()
+//固定屏幕底部样式
+position:fixed;
+bottom:0px;
+
+//分隔线样式
+<hr style="border:1px solid red">
+    
+//div顶部对齐样式
+vertical-align:top;
+
+//清除浮动
+style="clear:both;"
+
+//css换行
+p{ white-space:nowrap; }	#设置p标签不换行：
+p{ word-wrap:break-word; }	#自动换行
+p{ word-break:bread-all; }	#强制英文单词换行，需要将行内元素设置为块级元素
+p{ text-overflow:ellipsis;overflow:hidden; }	#超出显示省略号
+
+//设置背景图样式
+background-image:url("bg.jpg");		#设置背景图的url
+background-size:80%;		#设置背景图大小，可设置为绝对像素值、百分比、cover(填充整个容器)、contain(完整显示整个图片)
+background-repeat:no-repeat;	#可设置为repeat(重复)、no-repeat(不重复)、repeat-x(横向重复)、repeat-y(纵向重复)
+background-position:center;		#背景图位置，可设置为绝对像素值、百分比、center、top、bottom、lfet、right
 ```
+
+
 
 #### div置顶
 
@@ -163,6 +177,14 @@ F12检查页面body元素样式
 
 ```html
 <span style="vertical-align:baseline;"></span>
+```
+
+#### 其他
+
+```js
+//隐藏title
+<title>&lrm;</title>		//html里设置
+document.title='\u200E';	//js设置
 ```
 
 
