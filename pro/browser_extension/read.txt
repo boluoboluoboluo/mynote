@@ -1,0 +1,26 @@
+
+使用:
+	1.开启插件
+		浏览器->扩展->开发者模式
+		添加插件文件夹
+	2.确认安装python环境,开启python服务: python servername.py 		# 根据具体文件名
+		确认安装包: pip install requests
+					pip install requests[socks]
+	3.确认安装ffmpeg
+
+
+==============================
+问题:
+	有时点下载,没反应: 点 页面视频右下角播放器的picture-in-picture 
+
+	ctrl+c 无法中断python服务时,使用ctrl+break		#小键盘 pause/break
+
+	上外网,使用了vpn的话:
+		手动设置 python 服务端的代理:: session.proxies = proxies		#本地翻墙软件代理
+		注意检查 python 代码的代理端口 是否和 vpn 监听的端口一致
+
+
+	如果数据无法下载,可查看
+==============================
+
+

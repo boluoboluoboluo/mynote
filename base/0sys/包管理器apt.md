@@ -70,8 +70,11 @@ apt show <package_name>		#查看软件包的信息
 sudo apt install <package_name>	
 sudo apt install /full/path/file.deb		# 安装本地包
 sudo apt remove <package_name>	
-sudo apt autoremove		# 删除不需要的包（无依赖的）
+
+#卸载连招:
 sudo apt purge <package_name>	#移除软件包及配置文件
+sudo apt autoremove		# 删除孤儿包（无依赖的）
+
 apt list --installed		#列出本地已安装的包
 apt list --all-versions	#列出所有已安装的包的版本信息
 

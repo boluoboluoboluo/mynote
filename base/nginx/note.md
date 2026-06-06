@@ -17,9 +17,7 @@ sudo systemctl status nginx 	#查看运行状态
 sudo nginx -t	#检查配置文件语法
 ```
 
-
-
-#### 源码安装
+##### 源码安装
 
 ```sh
 # debian系统
@@ -224,9 +222,117 @@ keepalive_timeout 75;		#默认值
 keepalive_requests 100;		#默认
 ```
 
+#### 其他
+
+##### 说明
+
+```sh
+# 切割nginx日志: 	
+nginx安装后logrotate.d/下会建立配置文件,执行切割,不用改
+
+# 安装后,即启动了,并自启动状态,监听80端口
+# 注意: nginx开启的时候默认在下面这个文件会开启80端口,请注意
+etc/nginx/sites-enabled/default		#这是个软连接,删除即可
+```
 
 
-#### 上传413问题
+
+##### 性能补充
+
+```sh
+#进程数: 
+worker_processes auto;		#和cpu核心一致,不用改
+#最大连接数
+events {
+	worker_connections	1024;	#每个进程最大连接,默认768 或 1024,不用改
+}
+#长连接超时
+keepalive_timeout			#默认65秒,不用改
+
+#压缩
+http {
+	gzip on;				# 默认开启,不用改 (如果没开启,建议开启)
+}
+```
+
+**日志优化** 
+
+```sh
+#如果你的网站访问量很大（比如有很多视频、图片请求），频繁的磁盘写入日志会拖慢服务器性能。
+#你可以在你的独立配置文件中做如下优化：
+
+# 1. 静态资源（js/css/图片）通常很安全，可以关闭它们的访问日志，减少 80% 的写入开销
+location /static/ {
+    alias /home/project/myapp/static/;
+    access_log off; # 关闭静态资源访问日志
+}
+
+# 2. 动态请求开启日志缓冲区（Buffer）
+# 告诉 Nginx 攒满 32KB 的日志或每隔 5 秒再统一写入磁盘，大幅提升 I/O 性能
+access_log /var/log/nginx/blobvideo_access.log combined buffer=32k flush=5s;
+
+```
+
+##### 安全小知识
+
+```sh
+#隐藏版本号
+
+# 在 http 块中添加
+server_tokens off;
+
+============================
+#禁止通过 IP 直接访问网站：防止恶意域名解析到你的服务器 IP，或者黑客直接用 IP 探测你的站点。
+
+# 添加一个默认的 server 块，直接返回 443 或 400
+server {
+    listen 80 default_server;
+    server_name _;
+    return 443;
+}
+============================
+# 限制请求体大小：防止黑客通过上传超大文件使服务器内存崩溃（DOS 攻击）。
+
+# 限制上传文件最大为 10MB，根据业务调整
+client_max_body_size 10m;
+
+
+# 关闭上传目录执行权限
+location /uploads/ {
+    # 强制不解析 PHP 脚本，直接返回 403
+    location ~ .*\.(php|php5|sh|py|pl|rb)$ {
+        deny all;
+    }
+}
+
+```
+
+##### 超时
+
+```sh
+#nginx超时				  
+# 默认60s
+--proxy_read_timeout 60s;	# 超过 60 秒没有返回任何数据，Nginx 会主动断开，并向前端返回 504 Gateway Timeout
+--proxy_connect_timeout 60s;	#Nginx 尝试连接后端的 Gunicorn，如果 60 秒都连不上（通常是后端挂了或队列满了），直接断开
+--client_header_timeout 60s; / client_body_timeout 60s;#前端在上传超大视频时，如果因为网络太卡，导致连续 60 秒内没有向 Nginx 发送任何一个数据包，Nginx 就会断开请求
+```
+
+##### www-data用户
+
+```sh
+# 说明
+在 Ubuntu、Debian 等系统上，当你使用 apt 安装 Apache 或 Nginx 时，系统会自动创建并调用 www-data 用户来运行这些网页服务
+
+# 家目录
+/var/www
+
+# 不能用来登录
+它的默认 Shell 通常被设置为 /usr/sbin/nologin 或 /bin/false。这意味着任何人都无法通过密码或 SSH 远程登录到 www-data 账户
+```
+
+
+
+##### 上传413问题
 
 上传报错：`413 Request Entity Too Large`
 
@@ -236,7 +342,7 @@ keepalive_requests 100;		#默认
 
 ```nginx
 http{
-    client_max_body_size 100m;		#根据需要设置
+    client_max_body_size 100m;		#允许上传文件大小,根据需要设置
 }
 ```
 

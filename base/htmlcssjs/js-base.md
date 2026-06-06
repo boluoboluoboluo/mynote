@@ -93,7 +93,10 @@ const person = {
 };
 // 方式 2
 const obj = new Object();
-obj.name = 'Bob'; // 动态添加属性
+obj.name = 'Bob'; // 动态添加属性,或覆盖
+
+//删除
+delete obj[name]
 
 const jsonstr = '{"name": "Alice", "age": 25}';	//json字符串示例
 
@@ -122,6 +125,26 @@ for (const key in user) {
 
 //清空对象：通常直接 
 obj = {}
+```
+
+#### map
+
+```js
+// 说明:
+// 比js对象稍多内存,但是性能高
+
+const map = new Map();
+map.set(key,value);			//key不存在,新增,存在则覆盖
+const value = map.get(key);	//获取值,不存在返回undefined
+let has = map.has(key);		//判断是否存在,true or false ,时间复杂度o(1)
+let isdelete = map.delete(key);		//删除,成功返回true,key不存在返回false
+map.clear();				//清空
+let size = map.size;		//数量,性能高
+
+const obj = Object.fromEntries(map);	//转json对象 (前提是 Key 都是纯字符串)
+
+for (const [key, value] of map) {}	//遍历
+for (const key of btn_maps.keys()) {}	//遍历key
 ```
 
 
@@ -379,6 +402,17 @@ videos.forEach(addBtnToVideo);	//遍历,对每一个video执行addBtnToVideo方�
 ```js
 //阻止冒泡
 e.stopPropagation()
+```
+
+#### 关于import
+
+```sh
+#js 之间用 import
+
+#html 使用 <script src=""></script> 引入js ,不要用import:
+	--压缩的js可能出问题
+	--页面每次都要加载,影响缓存性能
+	--旧浏览器无法识别
 ```
 
 

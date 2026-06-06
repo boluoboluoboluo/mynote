@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+	<meta charset="UTF-8">
+	<title>安全视频播放站</title>
+	<!-- 引入 Video.js 的样式和脚本 -->
+	<link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+	<script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
+	<!-- <link href="{{ url_for('static', filename='video-js.css') }}" rel="stylesheet" />
+	<script src="{{ url_for('static', filename='video.min.js') }}"></script> -->
+	<style>
+		body { font-family: sans-serif; max-width: 800px; margin: 50px auto; padding: 0 20px; }
+		.box { border: 1px solid #ccc; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+		/* video { width: 100%; background: #000; margin-top: 100px; } */
+	</style>
+	</head>
+<body>
+
+	<h2>演示 1: 视频上传与后台自动切片</h2>
+	<div class="box">
+		<input type="file" id="videoFile" accept="video/mp4">
+		<button onclick="uploadVideo()">开始上传并切片</button>
+		<p id="uploadStatus" style="color: blue;"></p>
+	</div>
+
+	<h2>演示 2: 安全加密播放器 (Blob 机制)</h2>
+	<div class="box">
+		<!-- 禁用右键菜单、禁用自带下载按钮 -->
+		<!-- <video id="myPlayer" controls controlsList="nodownload" oncontextmenu="return false;"></video> -->
+		<video id="my-video" class="video-js vjs-default-skin" controls preload="auto" 
+				width="640" height="264">
+			<!-- <source src="" type="application/x-mpegURL"> -->
+		</video>
+	</div>
+
+	<script src="{{ url_for('static', filename='main.min.js') }}"></script>
+</body>
+</html>

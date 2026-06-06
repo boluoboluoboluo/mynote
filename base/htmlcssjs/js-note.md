@@ -1,3 +1,36 @@
+#### js的import
+
+`a.js `使用 `b.js` 的方法:
+
+`a.js` 内容:
+
+```js
+import { method_b } from './b.js';
+```
+
+`b.js` 内容:
+
+```js
+export method_b(){
+    console.log("this is b..")
+}
+```
+
+```sh
+# 说明:
+1.如果html 引入js 需要 指明 type=module
+<script type="module" src="a.js"></script>
+
+2.如果是浏览器插件,在manifest.json中,需添加:
+{
+  "background": {
+    "service_worker": "background.js",
+    "type": "module" // 必须加上这一行
+  }
+}
+
+```
+
 
 
 #### js单线程

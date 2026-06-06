@@ -1,5 +1,19 @@
 ### common
 
+```sh
+#linux下 安装:
+
+# 安装 Python3 的完整版、pip 以及开发必备的依赖环境
+sudo apt install python3 python3-pip python3-venv -y
+
+# 检查 Python 版本
+python3 --version
+# 检查 Pip 版本
+pip3 --version
+```
+
+
+
 #### 示例
 
 ```py
@@ -16,6 +30,7 @@ print("hello",flush=True)	#立即输出缓冲区
 
 #随机数
 r = random.randint(1,10)	#包含1和10
+random.uniform(0.2, 0.6)	#0.2 ~0.6
 
 #暂停3秒 
 time.sleep(3)
@@ -31,7 +46,9 @@ print(sys.argv)	#执行py test.py a b c 输出：['test.py','a','b','c']
 
 #执行系统命令
 os.system("mkdir today")	#不安全,弃用
-subprocess.run(["mkdir","param1","param2"],shell=True)		# import subprocess
+# import subprocess
+subprocess.run(["mkdir","param1","param2"],shell=True)	# shell=True,运行系统内建命令
+subprocess.run(["mkdir","param1","param2"],check=True)	# check=True,出错不再往下执行
 #示例:
 subprocess.run(["dir", "/a"])  # 运行Windows内置命令时,需加 shell=True
 
@@ -84,6 +101,9 @@ py xxx.py
 #### 引入模块
 
 ```python
+# pyton 天生单例模式,模块只有第一次引入的时候执行一次,加载到内存
+# 后续引入不再执行代码,读取同一份内存的对象数据
+
 #说明，当前文件为a.py，x为目录与a.py同级，y.py在x目录下，__init__.py与a.py同级
 from x import y 		#c从子目录x导入y.py 
 #若在__init__.py中引入y，则为：
@@ -393,15 +413,11 @@ filename = str(int(time.time())) + "".join(random.choices(string.ascii_letters, 
 #=====================
 #如果你需要生成的字符串绝对不重复（比如文件名或数据库主键）
 import uuid
-# 生成一个随机的 UUID
-unique_id = str(uuid.uuid4())
-print(unique_id)
-# 输出格式: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'
+# 生成一个随机的 UUID ,32 位 随机串
+unique_id = uuid.uuid4().hex	# 示例:02cfe939e535444a8d23a8a57a741b77
 #=====================
 
 ```
-
-
 
 
 
@@ -634,6 +650,51 @@ import hashlib
 | (?P<name>) | 分组起别名                       |
 | (?P=name)  | 引用别名为name分组匹配到的字符串 |
 
+##### 关于r和转义\
+
+```sh
+-----------------------------
+#关于 r"":
+#使用 r""	表示python语言解析器字符串的一切转义,反斜杠 \ 的作用全部交给正则表达式引擎处理
+1. 赋予普通字符“超能力”:
+	#当 \ 后面跟着某些普通字母时，正则引擎会把它们组合成具有特殊含义的字符集,示例:
+    \d：代表任意一个数字（0-9）
+    \w：代表任意一个字母、数字或下划线。
+    ...
+2. 剥夺特殊字符的“超能力”（转义）:
+    #在正则表达式中，很多符号自带特殊功能,前面加上 \，告诉正则引擎，这就是个普通符号
+    r"\."
+    r"\?"
+    ...
+----------------------------- 
+#必须转义的符号:
+\*
+\+
+\?
+\.
+\| 和 \\
+\^ 和 \$
+\( 和 \)
+\[ 和 \]
+\{ 和 \}
+----------------------------- 
+# 特例1
+# 在方括号 [...] 内部:
+除了 ^（在开头表示取反）、-（表示范围）和 \（转义）之外，绝大多数特殊符号都不需要转义。
+	#示例:
+	r"[.*?]"	#在方括号内，点、问号、星号直接代表它们本身
+
+# 特例2
+# 正斜杠 / 
+-- JavaScript / PHP / Perl：由于使用斜杠作为正则的边界符（如 /abc/），如果你要匹配文本中的 /，必须转义写成 \/
+-- Python / Java / C#：由于使用字符串包裹正则（如 r"abc"），/ 在这些语言中不是特殊符号，直接写 / 即可，不需要转义。
+
+# 特例3
+关于单引号,双引号,只有和外部包裹的引号冲突了,才需要转义
+```
+
+
+
 ##### 示例
 
 ```py
@@ -643,7 +704,7 @@ import re
 #将正则表达式字符串形式编译成正则表达式对象
 #编译后可调用search,match,findall,finditer,sub方法
 #regex = re.compile(pattern,flags=0)
-
+  
 reg = r"\d+"		#匹配首部是数字
 s = "23433aaa"
 pattern = re.compile(reg)	#编译后多次使用

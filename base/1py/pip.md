@@ -30,6 +30,14 @@ pip install --index-url=https://pypi.tuna.tsinghua.edu.cn/simple pyside6
 
 #卸载
 pip uninstall packge_name
+
+====================
+
+#导出依赖清单
+pip freeze > requirements.txt
+#安装项目依赖
+pip install -r requirements.txt
+
 ```
 
 #### 常见源

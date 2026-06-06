@@ -85,6 +85,11 @@ sftp> put local_file [remote_dir]	#上传文件
 sftp> mput local_files [remote_dir]	#批量上传文件		
 sftp> mput -r /test/ /home/test2/	#本地test下所有文件，传输到远程test2目录下
 sftp> exit 							#退出
+
+#示例:
+#拷贝当前目录下data目录下的所有文件 到 服务器/home/data/ 目录
+put -r ./data/ /home/data/		#注意检查.开头的文件是否上传
+	
 ```
 
  
