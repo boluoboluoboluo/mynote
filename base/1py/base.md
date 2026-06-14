@@ -446,6 +446,12 @@ print(message)
 '''
 path = r"C:\Program Files\Python"
 print(path)
+
+----------------------------
+# 注意:字符串的结尾不能是单数个反斜杠,会报错:
+s = r"xxx\"		# 报错
+s = r"xxx\\"	# 正确 输出:xxx\\
+s = "xxx\\"		# 正确 输出:xxx\
 ```
 
 ```py
@@ -1079,6 +1085,7 @@ name, extension = os.path.splitext(fname)
 
 #当前工作目录
 r = os.getcwd()
+os.chdir("/path/to/your/directory")	#设置工作录
 
 dname = "./a"
 fname = "./b.txt"
@@ -1089,7 +1096,7 @@ r = os.path.isfile(dname)	#判断是否文件
 if len(os.listdir(dname)) == 0:		#判断目录是否为空
 
 #目录遍历
-li = os.listdir()	#遍历当前目录，返回目录下的子目录和文件列表（不包含.和..目录）
+li = os.listdir()	#遍历当前目录，返回目录下的子目录和文件名字符串列表（不包含.和..目录）
 li2 = os.listdir(dpath)	#遍历指定目录
 
 #目录创建

@@ -1,5 +1,7 @@
 #### js的import
 
+##### js之间import
+
 `a.js `使用 `b.js` 的方法:
 
 `a.js` 内容:
@@ -16,19 +18,72 @@ export method_b(){
 }
 ```
 
+##### html引入js
+
 ```sh
 # 说明:
 1.如果html 引入js 需要 指明 type=module
 <script type="module" src="a.js"></script>
 
-2.如果是浏览器插件,在manifest.json中,需添加:
+```
+
+
+
+##### 插件引入
+
+`manifest.json `配置: 
+
+```json
+{
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["test.js","content.js"],		//配置在content.js 前面,会自动加载
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+    
+}
+```
+
+被引入的脚本 `test.js` 示例: 
+
+```js
+// 不需要 export
+
+//不要加 const 或其他关键字,否则会编程局部变量,content.js 无法拿到
+MY_CONFIG = {
+	NAME : "AAA",
+	AGE : 11
+}
+```
+
+`content.js` 示例: 
+
+```JS
+// 内容脚本 不需要import
+
+console.log(MY_CONFIG.NAME)		//使用
+
+```
+
+`background.js` 示例:
+
+```js
+importScripts('test.js');		//import 
+
+console.log(MY_CONFIG.NAME);		//使用
+```
+
+```sh
+# 注意: 此时 `manifest.json` 不能 加:  "type": "module"
 {
   "background": {
     "service_worker": "background.js",
-    "type": "module" // 必须加上这一行
-  }
-}
-
+    "type": "module" 			# 此时不能加上这一行
+  },
+}`
 ```
 
 
