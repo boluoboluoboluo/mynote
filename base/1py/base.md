@@ -892,7 +892,7 @@ def arr_ex():
 	#json转obj（如list,dict）
 	#obj = json.loads(jsonstr)			#需import json
     
-
+	arr2 = arr.copy()	# 复制一份
 ```
 
 #### 切片
@@ -926,7 +926,7 @@ del d			#删除字典
 
 len(d)		#长度
 str(d)		#字符串表示
-d.copy()	#浅复制
+d2 = d.copy()	#复制一份
 d.get(key,default=None)	#返回指定值，如不存在则返回default
 f = 'a' in d	#是否存在key
 d.keys		#列表形式返回所有key

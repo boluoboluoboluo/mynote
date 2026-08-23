@@ -40,6 +40,7 @@
 
 	注意:后台 background.js运行在独立的控制台,在扩展管理界面点击Servivce_Worker打开
 		 跨域默认不发送cookie,除非指定
+		后台脚本发送网络请求,如fetch时,由于浏览器安全限制,会把headers里面的referer删除,请注意!
 
 		 安装插件时,注意权限:
 		 	不要让插件"读取所有网站数据"(意味着可以读取本地数据,storage,cookie,session等)

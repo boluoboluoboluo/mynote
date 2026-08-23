@@ -1,0 +1,17 @@
+浏览器视频下载插件:
+
+使用:
+	1.确认安装ffmpeg
+	2.开启插件
+		浏览器->扩展->开发者模式
+		添加插件文件夹 browser_extension
+	3.确认安装python环境
+		阅读文件夹 pyv_extserver2 的 read.md, 部署并运行后端服务
+		//外网,vpn
+		//注意修改后端python代码config.py的相关配置
+
+
+==============================
+问题:
+	有时点下载,没反应: 点 页面视频右下角播放器的picture-in-picture 
+	ctrl+c 无法中断python服务时,使用ctrl+break		#小键盘 pause/break

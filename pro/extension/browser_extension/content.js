@@ -1,4 +1,4 @@
-console.log("init content.js...")
+console.log("init content.js...");
 
 let down_panel_id = "";	//下载面板id
 let render_timer = null;	//渲染定时器
@@ -11,19 +11,6 @@ const btn_maps = new Map();	//保存添加的下载按钮,与视频元素绑定,
 const createRandomStr = ()=>{
 	return Math.random().toString(36).slice(2); 
 }
-//==============================================
-//页面注入js,将pagescript.js注入当前页面
-//==============================================
-;(function(){
-	let id = "bl_js_" + createRandomStr()
-	if(!document.getElementById(id)){
-		js_ele = document.createElement("script")
-		js_ele.id = id
-		js_ele.src = chrome.runtime.getURL("pagescript.js")
-		js_ele.async = true
-		document.head.appendChild(js_ele)
-	}
-})();
 //==============================================
 //处理视频元素 (添加下载按钮及其功能)
 //==============================================
@@ -60,34 +47,38 @@ const add_video_btn = (video)=>{
 	//按钮点击事件
 	btn.onclick = async (e) =>  {
 		e.stopPropagation()	
-		// if(btn.dataset.offflag)return;
-		// btn.dataset.offflag = "1";		//执行一次
+		// let video_url = video.currentSrc || video.src || video.querySelector('source')?.src;
+		add_down_panel();		//创建下载面板
+		console.log("=========开启网络监听=========");
+		//往后台脚本发送消息 开启后台网络监听
+		const msg = await chrome.runtime.sendMessage({
+			type: "OPEN_LISTEN",	
+			btn_id:btn.id		//当前下载按钮 id
+		});
+		if(!msg.done){
+			console.log(msg.msg);
+			return;
+		}
+		console.log("=========当前视频开始重新加载..");
+		// 1. 记录当前的播放位置等信息
+    	const savedTime = video.currentTime;
+		const isPaused = video.paused;
+		// 2. 监听元数据加载完成的事件（必须在此事件后才能设置时间）
+		video.addEventListener('loadedmetadata', function onMetadata() {
+			video.currentTime = savedTime;
+			if(isPaused)video.pause();
+			console.log("元数据加载事件...")
+			// 移除监听器，避免下次播放时重复触发
+			video.removeEventListener('loadedmetadata', onMetadata);
+		}, { once: true }); // 使用 once: true 也可以确保只触发一次
+		// 视频地址 判断重新加载方式
 		let video_url = video.currentSrc || video.src || video.querySelector('source')?.src;
-		console.log("=========find videoUrl:" + video_url)
-		if(video_url && !video_url.startsWith("blob:")){
-			console.log("=========非blob格式=========");
-			//派发事件到注入的js
-			const event = new CustomEvent("downEvent",{
-				detail:{
-					video_url:video_url
-				}
-			})
-			document.dispatchEvent(event)	//派发事件到注入的js脚本
+		if(video_url.startsWith("blob:")){		//blob 格式
+			video.src = "";
+			video.load();	// 清空当前缓冲区
+			video.src = video_url;
 		}else{
-			console.log("=========blob格式=========");
-			add_down_panel();		//创建下载面板
-			console.log("=========开启网络监听=========")
-			//往后台脚本发送消息 开启后台网络监听
-			const msg = await chrome.runtime.sendMessage({
-				type: "OPEN_LISTEN",	
-				btn_id:btn.id		//当前下载按钮 id
-			});
-			if(!msg.done){
-				console.log(msg.msg);
-				return;
-			}
-			console.log("=========当前视频开始重新加载..")
-			video.load()	//视频重新加载 (后台就可以监听视频地址)
+			video.load();	// 视频重新加载 (后台就可以监听视频地址)
 		}
 	};
 	document.body.appendChild(btn);
@@ -164,8 +155,10 @@ const btn_rendering = ()=>{
 //真实下载面板,显示左下角
 //==============================================
 const add_down_panel = () => {
-	if (down_panel_id){	// 防止重复添加
-		document.getElementById(down_panel_id).innerHTML = "";
+	// 防止重复添加
+	if (down_panel_id){
+		document.getElementById(down_panel_id).querySelector('.content').innerHTML = "";
+		document.getElementById(down_panel_id).style.display = "";
 		return;
 	}
 	const panel = document.createElement("div");
@@ -177,87 +170,154 @@ const add_down_panel = () => {
 		z-index: 2147483647 !important;
 		bottom: 15px !important;
 		left: 10px !important;
-		background: #ffffff !important;
-		color: #000000 !important;
-		padding: 10px !important;
+		min-width: 150px;
+		min-height:50px;
+		background-color: rgba(0,0,0,0.8) !important;
+		color: #fff !important;
+		border: 1px solid #fff;
+		border-radius: 1px;
+		padding: 5px 5px !important;
 		font-size: 12px !important;
-		border: 2px solid black !important;
-		box-shadow: 0 0 10px rgba(0,0,0,0.5) !important;
 		pointer-events: auto !important;
 	`;
+	const tipspan = document.createElement("span");
+	tipspan.innerHTML = "下载捕获";
+	panel.appendChild(tipspan);
+	const clbtn = document.createElement("span");
+	clbtn.style.cssText = `
+		position: absolute;       
+		top: 1px;                /* 距离顶部的距离 */
+		right: 1px;              /* 距离右侧的距离 */
+		line-height: 0.7;
+		cursor: pointer;          /* 鼠标悬停时显示小手图标 */
+		font-size: 18px;
+		color: #bbbbbb;
+		user-select: none;        /* 防止用户双击误选中文本 */
+		transition: color 0.2s;   /* 过渡动画 */
+	`;
+	clbtn.innerHTML = '&times;'; // 使用 HTML 实体叉号 ×
+	// 为关闭按钮添加鼠标悬停效果（变红）
+    clbtn.addEventListener('mouseenter', () => clbtn.style.color = '#fe1111');
+    clbtn.addEventListener('mouseleave', () => clbtn.style.color = '#bbbbbb');
+	clbtn.addEventListener('click', (event) => {
+        event.stopPropagation(); // 阻止事件冒泡，防止触发父元素的点击事件
+        panel.style.display = 'none'; // 隐藏整个弹窗
+    });
+	panel.appendChild(clbtn);
+	const cont = document.createElement("div");
+	cont.className = "content";
+	panel.appendChild(cont);
 	document.body.appendChild(panel);
 };
 //==============================================
 //创建真实下载按钮
 //==============================================
-const add_down_btn=(name,jump_type)=>{
+const add_down_btn=(name,down_type,video_url,audio_url,request_id)=>{
+	//-------------------------------
+	// 在下载面板里,创建真正的 下载按钮
 	const down_panel = document.getElementById(down_panel_id);
 	let btn = document.createElement("button");			//创建下载按钮
 	let btnbox = document.createElement("div");
-	btnbox.cssText = `
-		padding: 5px !important;
+	btnbox.className = 'child-div';
+	btn.style.cssText = `
+		background-color: #fff !important;
+		color: #111 !important;
+		border: 1px solid #fff;
+		border-radius: 2px;
+		cursor: pointer;
+		padding: 1px;
+		margin:	1px !important;
 	`
-	btn.cssText = `
-		background: #ffffff !important;
-	`
-	btn.innerText = message.filename;
+	btn.innerText = name;
 	btnbox.appendChild(btn);
-	down_panel.appendChild(btnbox);
+	const pg = document.createElement("span");	
+	btnbox.appendChild(pg);
+	down_panel.querySelector(".content").appendChild(btnbox);
+	//-------------------------------
+	// 点击事件
+	btn.onclick = async (e) => {
+		e.stopPropagation();
+		btn.nextSibling.style.display = "";	//显示进度条
+		console.log("down type: ",down_type)
+		if(down_type === MY_CONFIG.NORMAL_TYPE){
+			console.log("开始向后台发起下载...");
+			//往后台脚本发送消息 因为跨域的原因,只能让后台脚本下载
+			const data = await chrome.runtime.sendMessage({
+				type: "DOWN_NORMAL",
+				video_url:video_url,
+				audio_url:audio_url,
+				request_id:request_id
+			});
+			if(data.task_id){
+				open_query_connect(btn,data.task_id);	//开启和后台脚本通信长连接,实时更新下载进度
+			}
+			return;
+		}
+		//下载m3u8格式
+		if(down_type === MY_CONFIG.M3U8_TYPE){			
+			console.log("开始向后台发起下载...");
+			//往后台脚本发送消息 因为跨域的原因,只能让后台脚本下载
+			const data = await chrome.runtime.sendMessage({
+				type: "DOWN_M3U8",
+				video_url:video_url,
+				audio_url:audio_url,
+				request_id:request_id
+			});
+			if(data.task_id){
+				open_query_connect(btn,data.task_id);	//开启和后台脚本通信长连接,实时更新下载进度
+			}
+			return;
+		}
+	}
+}
+//==============================================
+//开启和后台脚本通信长连接,实时查询下载进度
+//btn: 当前真实下载按钮
+//task_id: 后台生成的本次下载down_id,唯一
+//==============================================
+function open_query_connect(btn,task_id){
+	// 1. 建立长连接，并给这个通道起个名字
+	const port = chrome.runtime.connect({ name: "UPDATE_PROGRESS" });
+	// 2. 500毫秒后发送一次询问
+	setTimeout(()=>{
+		port.postMessage({ task_id: task_id });
+	},500);
+	// 3. 监听后台发回来的消息
+	port.onMessage.addListener((msg) => {
+		console.log("长连接收到后台消息:", msg);
+		if(msg.error == 1){
+			btn.nextSibling.textContent = "进度:出错了..";
+			port.disconnect();	//关闭连接
+			return;
+		}
+		if(msg.status === 0){
+			//更新进度
+			btn.nextSibling.textContent = "进度:"+msg.pg_value;
+			//500毫秒后再询问
+			setTimeout(()=>{
+				port.postMessage({ task_id: task_id });
+			},500);
+			return;
+		}
+		if(msg.status === 1){	//下载完成
+			btn.nextSibling.textContent = "进度:"+msg.pg_value;
+		}
+		port.disconnect();	//关闭连接
+	});
 }
 //==============================================
 //监听后台脚本消息
 //==============================================
 chrome.runtime.onMessage.addListener((message) => {
-	if (window.self !== window.top) {	//只处理顶层,排除掉页面的iframe里接收消息的可能性
+	//只处理顶层,排除掉页面的iframe里接收消息的可能性
+	if (window.self !== window.top) {
 		return; 
 	}
-	//-------------------------------
-	const down_url_types = ["NORMAL_DOWN_URL","M3U8_DOWN_URL"];		//消息类型 捕获到的视频请求地址
-	if (down_url_types.includes(message.type)) {
-
-		// add_down_btn();
-
-		const down_panel = document.getElementById(down_panel_id);
-		let btn = document.createElement("button");			//创建下载按钮
-		let btnbox = document.createElement("div");
-		btnbox.cssText = `
-			padding: 5px !important;
-		`
-		btn.cssText = `
-			background: #ffffff !important;
-		`
-		btn.innerText = message.filename;
-		btnbox.appendChild(btn);
-		down_panel.appendChild(btnbox);
-		//-------------------------------
-		btn.onclick = async (e) => {
-			e.stopPropagation();
-			if(message.type === "NORMAL_DOWN_URL"){
-				console.log("开始向注入js发起下载...");
-				//向后台脚本发消息,拿请求头
-				const headers = await chrome.runtime.sendMessage({ type: "GET_REQUEST_HEADERS",request_id:message.request_id });
-				//派发事件到注入的js
-				const event = new CustomEvent("downEvent",{
-					detail:{
-						video_url:message.video_url,
-						audio_url:message.audio_url,
-						headers:headers.headers
-					}
-				})
-				document.dispatchEvent(event)	//派发事件到注入的js脚本
-				return;
-			}
-			if(message.type === "M3U8_DOWN_URL"){
-				console.log("开始向后台发起下载...");
-				//往后台脚本发送消息 因为跨域的原因,只能让后台脚本下载
-				chrome.runtime.sendMessage({
-					type: message.type,
-					video_url:message.video_url,
-					audio_url:message.audio_url,
-					request_id:message.request_id
-				});
-				return;
-			}
+	// 创建下载按钮消息
+	if (message.type == "CREATE_DOWN_BUTTON") {
+		data = message.data;
+		for(const d of message.data){
+			add_down_btn(d.filename,d.type,d.video_url,d.audio_url,d.request_id);
 		}
 	}
 });

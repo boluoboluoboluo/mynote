@@ -1,4 +1,5 @@
 //供页面注入的js脚本文件
+//已改为后端下载,未使用
 console.log("pagescript init ...")
 
 //==============================================
@@ -17,6 +18,7 @@ async function normal_down(url,headers){
 	const res = await fetch(url,{
 		headers:headers
 	})
+	console.log("res:",res)
 	if (!res.ok) {
 		console.log("请求出错. ")
 		return

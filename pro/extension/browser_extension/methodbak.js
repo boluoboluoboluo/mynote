@@ -70,6 +70,12 @@
 
 //==============================================
 //页面注入js,将pagescript.js注入当前页面
+//需要在manifest.json 的 web_accessible_resources 参数里声明
+//示例:
+//   "web_accessible_resources": [{
+//     "resources": ["pagescript.js","constants.js"],
+//     "matches": ["<all_urls>"]
+//   }]
 //==============================================
 // ;(function(){
 // 	let id = "bl_js_" + createRandomStr()
@@ -80,6 +86,12 @@
 // 		js_ele.async = true
 // 		document.head.appendChild(js_ele)
 // 	}
+// })();
+//----------------
+// 注入方式2:
+// (async () => {
+// 	const psrc = chrome.runtime.getURL("pagescript.js");
+// 	await import(psrc)
 // })();
 
 //==============================================

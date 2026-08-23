@@ -105,6 +105,7 @@ git restore	[file]	#恢复
 git restore --stage [file]	#恢复在暂存区的改动
 
 git log			#查看版本号
+git reset --hard HEAD~1		#恢复到上一个版本
 git reset --hard d8fc1e10c9exxxxxxxxxxxxxx	#恢复到指定版本 hard后面为版本id
 git reset --hard x	#回退到某个本地版本,x为git log中出现的hash值的前七位。hard表示丢弃工作区和暂存区改动
 git push -f origin master			#强制push
@@ -247,19 +248,25 @@ git config --global user.email
 **`.gitignore`文件示例：** 
 
 ```sh
+# 忽略单个文件 (当前目录下)
+/config.env
+# 忽略单个文件 (所有目录下)
+config.env
 # 忽略所有 .log 文件
 *.log
 # 忽略所有 .tmp 文件，但保留 todo.tmp
 *.tmp
 !todo.tmp
-# 忽略所有在 build/ 目录下的文件
+# 忽略当前目录的 build 目录
+/build/
+# 忽略任意深层目录的 build 目录
 build/
 # 忽略所有在 doc/ 目录及其子目录下的文件
-doc/*
+/doc/*
 # 忽略所有在 .gitignore 文件当前目录下的 .env 文件
-.env
-# 忽略所有在 test/ 目录下的 .txt 文件
-test/**/*.txt
+/.env
+# 忽略所有在 /test/ 目录下的 .txt 文件
+/test/**/*.txt
 ```
 
 在创建或更新`.gitignore`后，需要运行`git add`命令来重新加入不被忽略的文件，这样才能被Git跟踪。

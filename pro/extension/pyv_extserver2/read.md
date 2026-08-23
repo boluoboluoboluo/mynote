@@ -51,31 +51,27 @@ gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
 
 ```
 
-#### swagger文档
-
-```sh
-# swagger 文档查看路径:
-http://127.0.0.1/docs	# 查看自动生成的 api 文档
-```
-
-
-
 #### 其他
 
 ```sh
 # 注意:
 不要用reload 方式启动,会导致ffmpeg调用失败
 uvicorn app:app --reload --port 8000		# 不要用这个命令
-
-# 注意:
-代码里 httpx.AsyncClient 连接池,一定要使用全局单例,如果每个请求创建和关闭,开销会挺大
-
-# 关于信号量
-1.并发请求m3u8分片使用局部信号量 (每个用户单独拥有的并发数)
-2.ffmepg进程调用使用全局信号量控制 (控制同时调用ffmpeg的进程数据,防止内存和cpu消耗)
 ```
 
+```sh
+# swagger 文档查看路径:
+http://127.0.0.1/docs	# 查看自动生成的 api 文档
+```
 
+#### 补充:快捷方式
+
+```sh
+run_activate.py		# 双击快速进入虚拟环境脚本
+run_app.py			# 双击快速启动服务脚本
+
+requirements.txt	# 依赖清单
+```
 
 
 

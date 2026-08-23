@@ -1,0 +1,24 @@
+
+
+=========================
+之解决扫描导致电脑发热问题:
+
+方案一: 在扫描中排除它自己
+	1.打开 Windows 安全中心 -> 病毒和威胁防
+	2.在“病毒和威胁防护设置”下，点击 管理设置
+	3.划到最下方，点击 添加或删除排除项
+	4.点击 添加排除项，选择 文件，将以下路径添加进去：
+		C:\Program Files\Windows Defender\MsMpEng.exe
+	5.再次点击 添加排除项，选择 文件夹，添加：
+		C:\Program Files\Windows Defender
+
+关闭计划任务中的“空闲扫描”
+	1.按 Win + R 键，输入 taskschd.msc，回车打开 任务计划程序
+	2.在左侧依次展开：任务计划程序库 -> Microsoft -> Windows -> Windows Defender。
+	3.在中间找到 Windows Defender Scheduled Scan（定时扫描），双击打开它。
+	4.切换到 条件 选项卡，取消勾选 “只有在计算机空闲以下时间时才启动定时扫描”。
+	5.切换到 触发器 选项卡，如果里面有自带的触发器，选中它并点击 删除，然后点击确定保存。
+
+=========================
+google 搜索 github denfender control
+
