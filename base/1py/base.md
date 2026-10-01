@@ -159,7 +159,14 @@ else:
     print("else")
 	
 #无switch语句	#python3.10支持match case
-	
+match command:
+    case "a":
+        print("aa")
+    case "b":
+        print("bb")
+    case _:
+        print("default")
+     
 #while语句
 while i > 0:
     print(i)
@@ -263,9 +270,19 @@ r = isinstance(i,int)	#判断是否int
 r = isinstance(i,float)	#判断是否float
 r = str(i).isdigit()	#判断是否数字
 
-#取整，四舍五入，向上取整，向下取整
-r = int(i)			#取整
+# 取整
+r = int(i)
+# 示例
+r = int(1/3)
+r = 1//3		# 取整,速度快
+r = int(-1/3)	# 取整,0 向0靠拢
+r = -1//3		# 取整,-1 向下取整
+
 r = round(i,3)		#保留3位 四舍五入
+	#说明:round() 并不是真正的四舍五入
+    当小数部分刚好是 0.5 时，它不一定会往上加，而是向最近的偶数靠拢
+    round(1.5) 结果是 2 （看似正常）
+    round(2.5) 结果是 2 （反直觉！因为 2 是偶数，它没有变成 3）
 r = math.floor(i)	#向下取整
 r = math.ceil(i)	#向上取整
 
@@ -935,6 +952,47 @@ d.pop(key)	#返回并删除指定key
 d.popitem()	#返回并删除最后一个键值对
 ```
 
+#### 元组
+
+```sh
+# 内容不可变对象
+元组是不可变的，它没有类似列表的 append()、insert()、pop() 或 remove() 等修改方法
+
+# 定义示例
+tup1 = (1, 2, "Python", 3.14)
+empty_tup = ()	# 空元组
+single_tup1 = (50,)  # 单个元素,正确的元组定义
+single_tup2 = (50)   # 错误！这只是一个被括号包围的整数，类型为 int
+tup2 = 1, 2, 3  # 相当于 tup2 = (1, 2, 3)
+
+
+
+```
+
+#### 迭代器
+
+```sh
+# 通过维护一个内部状态指针，每次只在内存中生成或读取当前需要的那个元素
+# 在 CPython 中，每个内置类型都是一个 PyTypeObject 结构体
+# iter(obj) 在 C 底层对应调用类型对象上的 tp_iter 函数指针
+# next(it) 在 C 底层对应调用类型对象上的 tp_iternext 函数指针
+
+# 示例
+# 底层创建了一个迭代器
+for i in [1,2,3,4]:
+	print(i)
+-------------------------
+# 问题:迭代器只能用一次
+it = iter([1, 2, 3])
+lst = list(it)  # 此时底层循环执行完毕 迭代器内部的状态指针（如 it_index）已经指向了末尾
+print(list(it)) # 再次转换，直接返回空列表 []
+
+# 无限流 (内存溢出风险)
+list(it)	# 迭代器把所有未来的元素在这一瞬间全部实例化并塞进内存
+```
+
+
+
 #### set
 
 ```py
@@ -957,6 +1015,44 @@ m_set.clear()	#清空
 m_set.union(m_set2)		#合并
 m_set.intersection(m_set2)	#交集
 m_set.difference(m_set2)	# m_set有，m_set2中没有的元素
+```
+
+#### zip
+
+```sh
+# 用于将多个可迭代对象（如列表、元组、字符串等）中对应的元素打包成一个个元组，然后返回一个可迭代的 zip 对象
+
+names = ['Alice', 'Bob', 'Charlie']
+ages = [24, 50, 18]
+# 打包组合
+result = zip(names, ages)
+li = list(result)
+di = dict(result)
+
+```
+
+#### map
+
+```py
+# 用于将一个指定的函数依次作用于可迭代对象（如列表、元组等）的每一个元素，并返回一个迭代器（map 对象）
+
+it = map(function, iterable, ...)	
+print(list(it))		# 可用 list() 或 tuple() 将其转换
+
+# 示例
+str_list = ['1', '2', '3', '4']
+result = map(int, str_list)
+print(list(result)) 
+
+# 示例,配合 lambda 使用
+numbers = [1, 2, 3, 4]
+squared = list(map(lambda x: x ** 2, numbers))
+print(squared)
+
+# lambda 接收两个参数，分别来自 list1 和 list2
+sum_list = list(map(lambda x, y: x + y, list1, list2))
+
+
 ```
 
 

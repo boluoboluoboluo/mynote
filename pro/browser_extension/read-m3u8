@@ -1,0 +1,88 @@
+
+==============================================
+m3u8文件规则
+
+初步检测:
+
+判断是否 索引m3u8文件:
+	请求 m3u8 url,取前10行判断是否包含:#EXT-X-STREAM-INF
+	包含就是索引文件
+
+拿到索引m3u8文件,遍历:
+	如果有 "TYPE=AUDIO" 就是音频行,里面有音频分片m3u8
+	如果有 "RESOLUTION" 就是视频行,里面有对应分辨率的视频分片m3u8
+
+视频分片 m3u8和音频分片m3u8 解析:
+	如果行包含 "EXT-X-MAP:URI" 		#主要出现在 Fragmented MP4 (fMP4) 格式的 HLS 中
+	必须首先下载它，并把它写入最终文件的最开头
+	其他分片在 非 "#" 号 开头的行
+		分片地址前面有斜杠则为绝对地址,只要与当前域名部分连接即可	#示例: http://xxx.xx.com + 分片地址
+		如果没有斜杠则为相对地址,则需要根据主索引m3u8的url最后一个斜杠之前的部分,做连接 
+			#示例: http:/xxx.xx.com/aaa/bbb/index.m3u8		#索引m3u8的url
+			# http:/xxx.xx.com/aaa/bbb + / + 分片地址		#组成完整分片url
+
+	如果视频被加密，解析时必须找到这一行：'#EXT-X-KEY:METHOD=AES-128,URI="key.php",IV=0x...'
+	解析规则：你需要提取 URI 去下载密钥 (Key)，如果存在 IV (偏移量) 也要记录。下载分片后，必须先用这个 Key 解密，然后用 Crypto 库进行解密,才能进行拼接。
+
+拼接分片时:
+	简单的二进制拼接 将下载的m3u8分片文件写入到临时文件
+	封装临时文件: #命令: ffmpeg -i temp_all.mp4 -c copy output.mp4
+
+
+视频文件 和 音频文件 合并:
+	最后使用 ffmpeg 命令,合并视频和音频文件: # 示例命令: ffmpeg -i "audio.m4s" -i "video.m4s" -c copy "output.mp4"
+
+
+==============================================
+m3u8主索引文件内容示例:
+
+#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-INDEPENDENT-SEGMENTS
+#EXT-X-MEDIA:NAME="Audio",TYPE=AUDIO,GROUP-ID="audio-128000",AUTOSELECT=YES,URI="/amplify_video/2041532546689703937/pl/mp4a/128000/ZQ2naHrqmsXIKB5q.m3u8"
+#EXT-X-MEDIA:NAME="Audio",TYPE=AUDIO,GROUP-ID="audio-64000",AUTOSELECT=YES,URI="/amplify_video/2041532546689703937/pl/mp4a/64000/aPVHrKwniPhS26-2.m3u8"
+#EXT-X-MEDIA:NAME="Audio",TYPE=AUDIO,GROUP-ID="audio-32000",AUTOSELECT=YES,URI="/amplify_video/2041532546689703937/pl/mp4a/32000/AjjJCA_oqRy3-xxq.m3u8"
+
+#EXT-X-STREAM-INF:AVERAGE-BANDWIDTH=1457822,BANDWIDTH=4309149,RESOLUTION=1920x1080,CODECS="mp4a.40.2,avc1.640032",AUDIO="audio-128000"
+/amplify_video/2041532546689703937/pl/avc1/1920x1080/gZfVUNs6tYmLpOTa.m3u8
+#EXT-X-STREAM-INF:AVERAGE-BANDWIDTH=662477,BANDWIDTH=1642104,RESOLUTION=1280x720,CODECS="mp4a.40.2,avc1.64001F",AUDIO="audio-128000"
+/amplify_video/2041532546689703937/pl/avc1/1280x720/gfA5P75AooH6Um--.m3u8
+#EXT-X-STREAM-INF:AVERAGE-BANDWIDTH=260475,BANDWIDTH=596089,RESOLUTION=640x360,CODECS="mp4a.40.2,avc1.4D401E",AUDIO="audio-64000"
+/amplify_video/2041532546689703937/pl/avc1/640x360/cBh7VjgjkCxs9lHz.m3u8
+#EXT-X-STREAM-INF:AVERAGE-BANDWIDTH=105107,BANDWIDTH=264464,RESOLUTION=480x270,CODECS="mp4a.40.2,avc1.4D4015",AUDIO="audio-32000"
+/amplify_video/2041532546689703937/pl/avc1/480x270/0U7cCld96-6mvUso.m3u8
+
+===============================================
+m3u8媒体文件内容示例:
+
+#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-MEDIA-SEQUENCE:0
+#EXT-X-TARGETDURATION:4
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-MAP:URI="/amplify_video/2047878984181112832/vid/avc1/0/0/320x488/zhvfAEoPDYrHF5lU.mp4"
+#EXTINF:3.000,
+/amplify_video/2047878984181112832/vid/avc1/0/3000/320x488/3OHYDsNtH6hUUotd.m4s
+#EXTINF:3.000,
+/amplify_video/2047878984181112832/vid/avc1/3000/6000/320x488/DbEx_x2lu2qafymk.m4s
+#EXTINF:3.000,
+/amplify_video/2047878984181112832/vid/avc1/6000/9000/320x488/CSFJjxcijQgPhPiX.m4s
+#EXTINF:3.000,
+/amplify_video/2047878984181112832/vid/avc1/9000/12000/320x488/_H63tILx6G7tYkM7.m4s
+#EXTINF:3.000,
+/amplify_video/2047878984181112832/vid/avc1/12000/15000/320x488/615KZhWUzutfgtxw.m4s
+#EXTINF:3.000,
+/amplify_video/2047878984181112832/vid/avc1/15000/18000/320x488/px5p1Y3sEqJguhgs.m4s
+#EXTINF:3.000,
+/amplify_video/2047878984181112832/vid/avc1/18000/21000/320x488/fhEr3Q40m9_bJSHm.m4s
+#EXTINF:3.000,
+/amplify_video/2047878984181112832/vid/avc1/21000/24000/320x488/m1TAGCLbwSfO0XKE.m4s
+#EXTINF:3.458,
+/amplify_video/2047878984181112832/vid/avc1/24000/27458/320x488/aKSOJqZssU3vnu-U.m4s
+#EXT-X-ENDLIST
+
+
+	
+
+
+
