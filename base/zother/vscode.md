@@ -43,6 +43,20 @@ settings.json 设置:
 import bencode  # type: ignore
 ```
 
+##### 缩进设置
+
+```sh
+# 问题:内容粘贴后,缩进全部变成空格了
+# 修改成tab
+1.打开'设置',搜索框输入'insert spaces'
+	-- 'Editor: Insert Spaces',取消勾选
+	-- 'detect indentation',取消勾选
+```
+
+
+
+
+
 ##### 卸载
 
 ```sh

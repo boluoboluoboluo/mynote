@@ -30,7 +30,9 @@ print("hello",flush=True)	#立即输出缓冲区
 
 #随机数
 r = random.randint(1,10)	#包含1和10
-random.uniform(0.2, 0.6)	#0.2 ~0.6
+random.random()		# [0,1) 的浮点数
+random.uniform(0.2, 0.6)	# [0.2,0.6]
+random.choice([1,2,3])		# 给定数据,随机选一个
 
 #暂停3秒 
 time.sleep(3)

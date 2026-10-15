@@ -1,0 +1,74 @@
+
+=========================================
+网格法+AABB
+碰撞迭代+分轴法
+碰撞后处理逻辑?
+	obj.collite(obj2)时:
+		-- 只修改 obj 的坐标
+			-- 检测 obj 和 obj2 的重叠区域
+			-- 如果是 x轴
+				如果 obj 在 obj2 的左边,且 obj 方向向右,就调整 obj 的坐标(右侧与 obj2 左侧贴合)
+				如果 obj 在 obj2 的右边,且 obj 方向向左,就调整 obj 的坐标(左侧与 obj2 右侧贴合)
+			-- y轴 同理
+			-- 如果要变换方向,必须在下一帧处理
+		-- 如果要体现对 obj2 的影响,需要额外的设计,比如受力 
+
+逻辑: 
+ 	-- 将窗口划分n个网格,精灵与周围8个网格的精灵进行校验
+ 	-- 发现碰撞,使用分轴法,修改精灵坐标,并且记录 坐标变化的精灵,用于2次迭代
+ 		-- 碰撞后处理逻辑? 一般情况
+ 	-- 设置迭代上限,在当前帧 迭代检测碰撞
+
+1.网格划分 
+	-- 思路: 
+	-- 确定网格小大: scale = 100
+	-- 根据窗口大小确定网格数(row,col)
+		row,col = screen_h//scale,screen_w//scale
+	-- 创建二维数组sheets[row][col],每个元素为1个group,用来保存当前网格的精灵
+		sheets[row][col] = pygame.sprite.Group()
+2.当前帧更新时:
+	-- 遍历精灵,更新位置
+		update,时,清空网格中的动态物体
+		for obj in all_screen:
+			obj.move()	# 移动
+			obj.add_to(sheets)	# 添加到网格
+3.碰撞检测:
+	-- 遍历精灵,与周围相邻的8个网格的精灵,进行碰撞检测:
+		# 遍历
+		for obj in all_screen:
+			check_collite(obj)
+			# 从旧坐标格子移除
+			# 添加新格子
+		# 碰撞检测方法
+		def check_collite(obj)
+			neighbors = obj.neighbors()	# 周围8个格子
+			for group in obj.neighbors():
+				# 与网格中精灵检测
+				collites = obj.check_groupcollite(group):	# 返回碰撞检测列表
+				if len(collites) > 0:	# 
+					hited = True	# 
+					for obj2 in collites:
+						if obj == obj2:
+							continue
+						hited = True	# 
+						# 碰撞处理,修改坐标
+						obj.rect.set()			
+	-- 迭代思路:
+		-- 收集遍历检测时发生碰撞的对象双方
+		-- 每次迭代只检测之前碰撞的双方有没有再次碰撞
+
+
+=========================================
+# 一些方法:
+
+ sprite.kill()
+ 	-- 安全,for循环里可用
+ group.remove(sprite)
+ 	-- for 循环遍历精灵组并尝试删除它们，千万不要使用 group.remove()，这会导致 Python 的迭代器发生错乱
+	 	-----------
+	 	# 下面是错误写法!
+	 	for sprite in my_group:
+	    	if sprite.rect.y > 600:
+	       		my_group.remove(sprite)
+	    -----------
+group.empty()
